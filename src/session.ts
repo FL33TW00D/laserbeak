@@ -7,7 +7,7 @@ export class Session {
 
     constructor() {}
 
-    _fetchBytes = async (url: string): Uint8Array => {
+    _fetchBytes = async (url: string): Promise<Uint8Array> => {
         const extension = url.split(".").pop();
         let bytes = await fetch(url).then((resp) => resp.arrayBuffer());
         if (extension === "gz") {
@@ -19,14 +19,14 @@ export class Session {
 
     init = async (modelPath: string) => {
         const [encoderBytes, decoderBytes, tokenizerBytes] = await Promise.all([
-            fetchBytes(
+            _fetchBytes(
                 "https://rmbl.us/modified_flan-t5-small_encoder_decoder_init_fp32_sim.onnx.gz"
             ),
-            fetchBytes(
+            _fetchBytes(
                 "https://rmbl.us/modified_flan-t5-small_decoder_fp32_sim.onnx.gz"
             ),
-            fetchBytes("resources/flan-t5/small/config.json"),
-            fetchBytes("resources/flan-t5/small/tokenizer.json"),
+            _fetchBytes("resources/flan-t5/small/config.json"),
+            _fetchBytes("resources/flan-t5/small/tokenizer.json"),
         ]);
         console.log("Initialized", {
             encoderBytes,
@@ -41,18 +41,6 @@ export class Session {
             configBytes,
             tokenizerBytes
         );
-    };
-
-    fetchData = async (modelPath: string): Promise<ArrayBuffer> => {
-        const extension = modelPath.split(".").pop();
-        let modelData = await fetch(modelPath).then((resp) =>
-            resp.arrayBuffer()
-        );
-        if (extension === "gz") {
-            modelData = pako.inflate(modelData);
-        }
-        localforage.setItem(modelPath, modelData);
-        return modelData;
     };
 
     run = async (

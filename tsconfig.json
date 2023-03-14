@@ -4,8 +4,8 @@
     "rootDir": ".",
     "outDir": "build"
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
-  ]
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "compilerOptions": {
+    "lib": ["DOM"]
+  }
 }
