@@ -1,20 +1,37 @@
-import * as pako from 'pako';
+import pako from 'pako';
 import * as Comlink from 'comlink';
 import * as rumble from '@rumbl/rumble-wasm';
+import ModelDB from './db';
 
 export class Session {
   rumbleSession: rumble.Session | undefined;
+  modelDB: ModelDB;
 
-  constructor() {}
+  constructor() {
+    let modelDB = new ModelDB();
+    modelDB.init();
+    this.modelDB = modelDB;
+  }
 
   _fetchBytes = async (url: string): Promise<Uint8Array> => {
-    const extension = url.split('.').pop();
-    let bytes = await fetch(url).then((resp) => resp.arrayBuffer());
-    if (extension === 'gz') {
-      bytes = pako.inflate(bytes);
+    try {
+        const cachedModel = await this.modelDB.get(url);
+        if (cachedModel) {
+            return new Uint8Array(await cachedModel.bytes.arrayBuffer()); 
+        }else {
+            let bytes = await fetch(url).then((resp) => resp.arrayBuffer());
+            const extension = url.split('.').pop();
+            if (extension === 'gz') {
+              bytes = pako.inflate(bytes);
+            }
+            const data = new Uint8Array(bytes);
+            await this.modelDB.set(url, new Blob([data]));
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+        return new Uint8Array();
     }
-    const data = new Uint8Array(bytes);
-    return data;
   };
 
   init = async (modelPath: string) => {
