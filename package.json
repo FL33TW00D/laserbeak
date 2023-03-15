@@ -1,4 +1,9 @@
 {
+  "name": "laser-beak",
+  "version": "0.0.1",
+  "description": "Access the Rumble API from the browser",
+  "repository": "FL33TW00D/laserbeak",
+
   "devDependencies": {
     "@types/node": "^14.11.2",
     "@types/pako": "^2.0.0",
@@ -18,7 +23,6 @@
   "dependencies": {
     "@rumbl/rumble-wasm": "^0.3.0",
     "comlink": "^4.4.1",
-    "esbuild": "0.17.11",
     "idb": "^7.1.1",
     "pako": "^2.1.0"
   }

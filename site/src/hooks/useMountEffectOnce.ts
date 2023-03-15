@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react'
+import {useEffect, useRef} from 'react';
 
 export const useMountEffectOnce = (fn: () => void) => {
-  const wasExecutedRef = useRef(false)
+  const wasExecutedRef = useRef(false);
   useEffect(() => {
     if (!wasExecutedRef.current) {
-      fn()
+      fn();
     }
-    wasExecutedRef.current = true
-  }, [fn])
-}
+    wasExecutedRef.current = true;
+  }, [fn]);
+};

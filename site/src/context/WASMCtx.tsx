@@ -1,8 +1,8 @@
-import type { WASM } from "../types";
-import { useState, createContext } from "react";
-import type { ReactNode } from "react";
-import { useMountEffectOnce } from "../hooks/useMountEffectOnce";
-import * as wasm from "@rumbl/rumble-wasm";
+import type {WASM} from '../types';
+import {useState, createContext} from 'react';
+import type {ReactNode} from 'react';
+import {useMountEffectOnce} from '../hooks/useMountEffectOnce';
+import * as wasm from '@rumbl/rumble-wasm';
 
 const initial: IWASMContext = {};
 
@@ -19,7 +19,7 @@ export const WASMContextProvider: React.FC<WASMContextProviderProps> = ({
   useMountEffectOnce(() => {
     (async () => {
       await wasm.default();
-      setState({ wasm });
+      setState({wasm});
     })();
   });
 

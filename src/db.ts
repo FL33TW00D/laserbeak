@@ -1,4 +1,4 @@
-import { openDB, DBSchema } from 'idb';
+import {openDB, DBSchema} from 'idb';
 
 interface ModelDB extends DBSchema {
   models: {
@@ -9,9 +9,8 @@ interface ModelDB extends DBSchema {
   };
   tensors: {
     value: {
-        name: string;
-        hash: string;
-
+      name: string;
+      hash: string;
     };
     key: string;
   };

@@ -1,1 +1,1 @@
-export type WASM = typeof import('../public/wasm')
+export type WASM = typeof import('../public/wasm');
