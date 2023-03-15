@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-wasm",
+  "name": "rumble-demo",
   "version": "1.4.0",
   "scripts": {
     "dev": "next dev",
@@ -9,15 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@rumbl/rumble-wasm": "^0.2.0",
-    "comlink": "^4.4.1",
-    "idb": "^7.1.1",
-    "localforage": "^1.10.0",
+    "laserbeak": "file:..",
     "next": "13.0.5",
-    "pako": "^2.1.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "wasm": "file:wasm/pkg"
+    "react": "^18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@types/node": "18.11.9",

@@ -1,4 +1,4 @@
-import {openDB, DBSchema} from 'idb';
+import { openDB, DBSchema } from 'idb';
 
 interface ModelDB extends DBSchema {
   models: {

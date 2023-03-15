@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import { useEffect, useRef } from 'react';
 
 export const useMountEffectOnce = (fn: () => void) => {
   const wasExecutedRef = useRef(false);

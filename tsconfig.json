@@ -1,5 +1,4 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
   "include": ["src/**/*.ts", "test/**/*.ts"],
   "compilerOptions": {
     "target": "ES2020",

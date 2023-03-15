@@ -1,20 +1,13 @@
-import {useContext, useState} from 'react';
-import type {WASM} from '../types';
-import {WASMContext} from '../context/WASMCtx';
-import {useMountEffectOnce} from '../hooks/useMountEffectOnce';
+import { useState } from 'react';
+import { useMountEffectOnce } from '../hooks/useMountEffectOnce';
 import samples from './samples.json';
+import { Session } from 'laserbeak';
 
 export const FLANExample = () => {
-  const ctx = useContext(WASMContext);
-
-  if (!ctx.wasm) {
-    return <>...</>;
-  }
-
-  return <FLAN wasm={ctx.wasm} />;
+  return <FLAN  />;
 };
 
-const FLAN: React.FC<FLANProps> = ({wasm}) => {
+const FLAN = () => {
   const [session, setSession] = useState<any | null>(null);
   const [inputText, setInputText] = useState<string>('');
   const [outputText, setOutputText] = useState<string>('');
@@ -40,7 +33,8 @@ const FLAN: React.FC<FLANProps> = ({wasm}) => {
 
   useMountEffectOnce(() => {
     (async () => {
-      const session = await createSession();
+      let session = new Session();
+      await session.init("bingaaaa");
       setSession(session);
     })();
   });
@@ -54,7 +48,7 @@ const FLAN: React.FC<FLANProps> = ({wasm}) => {
           className="mt-8 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           placeholder=""
           value={inputText}
-          onChange={e => setInputText(e.target.value)}
+          onChange={(e) => setInputText(e.target.value)}
           disabled={session === null}
         ></textarea>
 
@@ -97,7 +91,7 @@ const FLAN: React.FC<FLANProps> = ({wasm}) => {
               className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 "
               onClick={() => randomSample()}
             >
-              I'm feeling lucky
+              Im feeling lucky
             </button>
           </div>
           <div className="first-letter:uppercase">{outputText}</div>
@@ -106,7 +100,3 @@ const FLAN: React.FC<FLANProps> = ({wasm}) => {
     </>
   );
 };
-
-interface FLANProps {
-  wasm: WASM;
-}

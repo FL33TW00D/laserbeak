@@ -1,13 +1,13 @@
-import type {NextPage} from 'next';
+import type { NextPage } from 'next';
 import Head from 'next/head';
-import {FLANExample} from '../components/examples/FLANExample';
+import { FLANExample } from '../components/FLANExample';
 
 const Home: NextPage = () => {
   return (
     <div className="p-0">
       <Head>
         <title>Talk to FLAN-T5</title>
-        <meta name="description" content="Next.JS with WebAssembly" />
+        <meta name="description" content="Talk to FLAN-T5" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

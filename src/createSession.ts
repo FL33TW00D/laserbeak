@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink';
-import {Remote, wrap} from 'comlink';
-import {Session} from './session';
+import { Remote, wrap } from 'comlink';
+import { Session } from './session';
 
 export const createSession = async (
   modelPath: string,

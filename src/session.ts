@@ -9,7 +9,7 @@ export class Session {
 
   _fetchBytes = async (url: string): Promise<Uint8Array> => {
     const extension = url.split('.').pop();
-    let bytes = await fetch(url).then(resp => resp.arrayBuffer());
+    let bytes = await fetch(url).then((resp) => resp.arrayBuffer());
     if (extension === 'gz') {
       bytes = pako.inflate(bytes);
     }
