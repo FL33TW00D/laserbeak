@@ -9,13 +9,13 @@ export class Session {
 
   constructor() {
     let modelDB = new ModelDB();
-    modelDB.init();
     this.modelDB = modelDB;
   }
 
   _fetchBytes = async (url: string): Promise<Uint8Array> => {
     try {
         const cachedModel = await this.modelDB.get(url);
+        console.log('cachedModel', cachedModel);
         if (cachedModel) {
             return new Uint8Array(await cachedModel.bytes.arrayBuffer()); 
         }else {
@@ -35,16 +35,17 @@ export class Session {
   };
 
   init = async (modelPath: string) => {
+    await this.modelDB.init();
     const [encoderBytes, decoderBytes, configBytes, tokenizerBytes] =
       await Promise.all([
         this._fetchBytes(
-          'https://rmbl.us/modified_flan-t5-small_encoder_decoder_init_fp32_sim.onnx.gz'
+          'https://rmbl.us/modified_flan-t5-base_encoder_decoder_init_fp32_sim.onnx.gz'
         ),
         this._fetchBytes(
-          'https://rmbl.us/modified_flan-t5-small_decoder_fp32_sim.onnx.gz'
+          'https://rmbl.us/modified_flan-t5-base_decoder_fp32_sim.onnx.gz'
         ),
-        this._fetchBytes('resources/flan-t5/small/config.json'),
-        this._fetchBytes('resources/flan-t5/small/tokenizer.json'),
+        this._fetchBytes('resources/flan-t5/base/config.json'),
+        this._fetchBytes('resources/flan-t5/base/tokenizer.json'),
       ]);
     console.log('Initialized', {
       encoderBytes,
