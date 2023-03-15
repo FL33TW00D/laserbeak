@@ -18,15 +18,15 @@ export class Session {
     };
 
     init = async (modelPath: string) => {
-        const [encoderBytes, decoderBytes, tokenizerBytes] = await Promise.all([
-            _fetchBytes(
+        const [encoderBytes, decoderBytes, configBytes, tokenizerBytes] = await Promise.all([
+            this._fetchBytes(
                 "https://rmbl.us/modified_flan-t5-small_encoder_decoder_init_fp32_sim.onnx.gz"
             ),
-            _fetchBytes(
+            this._fetchBytes(
                 "https://rmbl.us/modified_flan-t5-small_decoder_fp32_sim.onnx.gz"
             ),
-            _fetchBytes("resources/flan-t5/small/config.json"),
-            _fetchBytes("resources/flan-t5/small/tokenizer.json"),
+            this._fetchBytes("resources/flan-t5/small/config.json"),
+            this._fetchBytes("resources/flan-t5/small/tokenizer.json"),
         ]);
         console.log("Initialized", {
             encoderBytes,
@@ -51,7 +51,7 @@ export class Session {
                 "the session is not initialized. Call `init()` method first."
             );
         }
-        return await this.ortSession.run(input);
+        return await this.rumbleSession.run(input);
     };
 }
 

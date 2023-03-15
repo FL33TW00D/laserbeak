@@ -1,4 +1,3 @@
-import * as ort from "onnxruntime-web";
 import * as Comlink from "comlink";
 import { Remote, wrap } from "comlink";
 import { Session } from "./session";
