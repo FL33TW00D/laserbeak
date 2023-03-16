@@ -2,7 +2,6 @@ import pako from 'pako';
 import * as Comlink from 'comlink';
 import * as rumble from '@rumbl/rumble-wasm';
 import ModelDB from './db';
-import { getObjectUrl } from "./s3/getObjectUrl";
 
 export class Session {
   rumbleSession: rumble.Session | undefined;
@@ -40,13 +39,13 @@ export class Session {
     const [encoderBytes, decoderBytes, configBytes, tokenizerBytes] =
       await Promise.all([
         this._fetchBytes(
-          'https://rmbl.us/modified_flan-t5-base_encoder_decoder_init_fp32_sim.onnx.gz'
+          'https://rmbl.us/modified_flan-t5-small_encoder_decoder_init_fp32_sim.onnx.gz'
         ),
         this._fetchBytes(
-          'https://rmbl.us/modified_flan-t5-base_decoder_fp32_sim.onnx.gz'
+          'https://rmbl.us/modified_flan-t5-small_decoder_fp32_sim.onnx.gz'
         ),
-        this._fetchBytes('resources/flan-t5/base/config.json'),
-        this._fetchBytes('resources/flan-t5/base/tokenizer.json'),
+        this._fetchBytes('resources/flan-t5/small/config.json'),
+        this._fetchBytes('resources/flan-t5/small/tokenizer.json'),
       ]);
     console.log('Initialized', {
       encoderBytes,
@@ -63,13 +62,13 @@ export class Session {
     );
   };
 
-  run = async (input: any): Promise<any> => {
+  run = async (input: any, callback: (token: string) => void): Promise<any> => {
     if (!this.rumbleSession) {
       throw Error(
         'the session is not initialized. Call `init()` method first.'
       );
     }
-    return await this.rumbleSession.run(input);
+    return await this.rumbleSession.stream(input, callback);
   };
 }
 

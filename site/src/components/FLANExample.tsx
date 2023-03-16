@@ -1,31 +1,35 @@
-import { useState } from 'react';
-import { useMountEffectOnce } from '../hooks/useMountEffectOnce';
-import samples from './samples.json';
-import { Session } from 'laserbeak';
+import { useState } from "react";
+import { useMountEffectOnce } from "../hooks/useMountEffectOnce";
+import samples from "./samples.json";
+import { Session } from "laserbeak";
 
 export const FLANExample = () => {
-  return <FLAN  />;
+  return <FLAN />;
 };
 
 const FLAN = () => {
   const [session, setSession] = useState<any | null>(null);
-  const [inputText, setInputText] = useState<string>('');
-  const [outputText, setOutputText] = useState<string>('');
+  const [inputText, setInputText] = useState<string>("");
+  const [outputText, setOutputText] = useState<string>("");
 
   function randomSample() {
     setInputText(samples[Math.floor(Math.random() * samples.length)]);
   }
 
   async function runSample() {
+    setOutputText("");
     try {
       if (!session || !inputText || inputText.length < 2) {
         return;
       }
       const start = performance.now();
-      const output = await session.run(inputText);
+      await session.run(inputText, (input: string) => {
+        setOutputText((prevState) => {
+          return prevState + " " + input;
+        });
+      });
       const duration = performance.now() - start;
-      console.log('Inference time:', duration.toFixed(2), 'ms');
-      setOutputText(output);
+      console.log("Inference time:", duration.toFixed(2), "ms");
     } catch (e: any) {
       console.log(e.toString());
     }
@@ -81,7 +85,7 @@ const FLAN = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Loading...{' '}
+                  Loading...{" "}
                 </div>
               ) : (
                 <p>Run</p>
