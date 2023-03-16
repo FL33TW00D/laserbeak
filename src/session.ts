@@ -2,6 +2,7 @@ import pako from 'pako';
 import * as Comlink from 'comlink';
 import * as rumble from '@rumbl/rumble-wasm';
 import ModelDB from './db';
+import { getObjectUrl } from "./s3/getObjectUrl";
 
 export class Session {
   rumbleSession: rumble.Session | undefined;
