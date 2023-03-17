@@ -34,15 +34,15 @@ export class Session {
     }
   };
 
-  init = async (modelPath: string) => {
+  init = async (encoderPath?: string, decoderPath?:string) => {
     await this.modelDB.init();
     const [encoderBytes, decoderBytes, configBytes, tokenizerBytes] =
       await Promise.all([
         this._fetchBytes(
-          'https://rmbl.us/modified_flan-t5-small_encoder_decoder_init_fp32_sim.onnx.gz'
+          `https://rmbl.us/${encoderPath}`
         ),
         this._fetchBytes(
-          'https://rmbl.us/modified_flan-t5-small_decoder_fp32_sim.onnx.gz'
+          `https://rmbl.us/${decoderPath}`
         ),
         this._fetchBytes('resources/flan-t5/small/config.json'),
         this._fetchBytes('resources/flan-t5/small/tokenizer.json'),

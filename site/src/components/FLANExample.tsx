@@ -38,7 +38,10 @@ const FLAN = () => {
   useMountEffectOnce(() => {
     (async () => {
       let session = new Session();
-      await session.init("bingaaaa");
+      await session.init(
+        "modified_flan-t5-small_encoder_decoder_init_fp32_sim.onnx.gz",
+        "modified_flan-t5-small_decoder_fp32_sim.onnx.gz"
+      );
       setSession(session);
     })();
   });

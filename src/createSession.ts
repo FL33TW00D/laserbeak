@@ -3,8 +3,9 @@ import { Remote, wrap } from 'comlink';
 import { Session } from './session';
 
 export const createSession = async (
-  modelPath: string,
-  proxy: boolean
+  proxy: boolean,
+  encoderPath?: string,
+  decoderPath?: string,
 ): Promise<Session | Comlink.Remote<Session>> => {
   if (proxy && typeof document !== 'undefined') {
     const worker = new Worker(new URL('./session.js', import.meta.url), {
@@ -12,11 +13,11 @@ export const createSession = async (
     });
     const exposedSession = wrap<typeof Session>(worker);
     const session: Remote<Session> = await new exposedSession();
-    await session.init(modelPath);
+    await session.init(encoderPath, decoderPath);
     return session;
   } else {
     const session = new Session();
-    await session.init(modelPath);
+    await session.init(encoderPath, decoderPath);
     return session;
   }
 };
