@@ -36,7 +36,7 @@ export class Session {
 
   init = async (encoderPath?: string, decoderPath?:string) => {
     await this.modelDB.init();
-    const [encoderBytes, decoderBytes, configBytes, tokenizerBytes] =
+    const [encoderBytes, decoderBytes, configBytes] =
       await Promise.all([
         this._fetchBytes(
           `https://rmbl.us/${encoderPath}`
@@ -45,29 +45,29 @@ export class Session {
           `https://rmbl.us/${decoderPath}`
         ),
         this._fetchBytes('resources/flan-t5/small/config.json'),
-        this._fetchBytes('resources/flan-t5/small/tokenizer.json'),
       ]);
     console.log('Initialized', {
       encoderBytes,
       decoderBytes,
       configBytes,
-      tokenizerBytes,
     });
     await rumble.default();
     this.rumbleSession = await rumble.Session.fromComponents(
       encoderBytes,
       decoderBytes,
       configBytes,
-      tokenizerBytes
     );
   };
 
-  run = async (input: any, callback: (token: string) => void): Promise<any> => {
+
+
+  run = async (input: Uint32Array, callback: (token: string) => void): Promise<any> => {
     if (!this.rumbleSession) {
       throw Error(
         'the session is not initialized. Call `init()` method first.'
       );
     }
+
     return await this.rumbleSession.stream(input, callback);
   };
 }

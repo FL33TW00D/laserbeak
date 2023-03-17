@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMountEffectOnce } from "../hooks/useMountEffectOnce";
 import samples from "./samples.json";
 import { Session } from "laserbeak";
+import {
 
 export const FLANExample = () => {
   return <FLAN />;
@@ -98,7 +99,7 @@ const FLAN = () => {
               className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 "
               onClick={() => randomSample()}
             >
-              Im feeling lucky
+              I&#39;m feeling lucky
             </button>
           </div>
           <div className="first-letter:uppercase">{outputText}</div>
