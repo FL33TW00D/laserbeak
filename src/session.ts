@@ -59,8 +59,6 @@ export class Session {
     );
   };
 
-
-
   run = async (input: Uint32Array, callback: (token: string) => void): Promise<any> => {
     if (!this.rumbleSession) {
       throw Error(
