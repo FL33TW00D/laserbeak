@@ -1,7 +1,6 @@
-import pako from 'pako';
 import * as Comlink from 'comlink';
 import * as rumble from '@rumbl/rumble-wasm';
-import ModelDB from './db';
+import ModelDB from './modelDB';
 
 export class Session {
   rumbleSession: rumble.Session | undefined;
@@ -12,30 +11,13 @@ export class Session {
     this.modelDB = modelDB;
   }
 
-  _fetchBytes = async (url: string): Promise<Uint8Array> => {
-    try {
-        const cachedModel = await this.modelDB.get(url);
-        console.log('cachedModel', cachedModel);
-        if (cachedModel) {
-            return new Uint8Array(await cachedModel.bytes.arrayBuffer()); 
-        }else {
-            let bytes = await fetch(url).then((resp) => resp.arrayBuffer());
-            const extension = url.split('.').pop();
-            if (extension === 'gz') {
-              bytes = pako.inflate(bytes);
-            }
-            const data = new Uint8Array(bytes);
-            await this.modelDB.set(url, new Blob([data]));
-            return data;
-        }
-    } catch (e) {
-        console.log(e);
-        return new Uint8Array();
-    }
-  };
-
-  init = async (encoderPath?: string, decoderPath?:string) => {
+  //TODO: generalize this
+  init = async (bundleName: string) => {
     await this.modelDB.init();
+    let storedModel = await this.modelDB.get_model(bundleName);
+    console.log("storedModel", storedModel);
+
+    /*
     const [encoderBytes, decoderBytes, configBytes] =
       await Promise.all([
         this._fetchBytes(
@@ -57,6 +39,7 @@ export class Session {
       decoderBytes,
       configBytes,
     );
+    */
   };
 
   run = async (input: Uint32Array, callback: (token: string) => void): Promise<any> => {
