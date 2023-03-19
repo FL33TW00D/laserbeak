@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useMountEffectOnce } from "../hooks/useMountEffectOnce";
 import samples from "./samples.json";
 import { Session } from "laserbeak";
-import {
 
 export const FLANExample = () => {
   return <FLAN />;

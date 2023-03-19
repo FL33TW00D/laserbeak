@@ -1,25 +1,31 @@
 import { Session } from "./session";
+import { Tokenizer } from "@rumbl/wokenizers";
 
 export class EncoderDecoder {
     session: Session | undefined;
-    tokenizer: Tokenizer;
+    tokenizer: Tokenizer | undefined;
 
     constructor() {
         this.session = new Session();
     }
-        
 
     async init() {
-        await this.tokenizer.initialize();
+        let bytes = await fetch("https://huggingface.co/google/flan-t5-small/raw/main/tokenizer.json");
+        let json = await bytes.json();
+        this.tokenizer = new Tokenizer(json);
+    }  
+
+    encode(input: string) {
+        if (!this.tokenizer) {
+            throw new Error("Tokenizer not initialized");
+        }
+         return this.tokenizer.encode(input);
     }
 
-    async encode(input: string) {
-        const encoded = await this.tokenizer.encode(input);
-        return encoded.ids;
-    }
-
-    async decode(input: number[]) {
-        const decoded = await this.tokenizer.decode(input);
-        return decoded;
+    decode(input: Uint32Array) {
+        if (!this.tokenizer) {
+            throw new Error("Tokenizer not initialized");
+        }
+        return this.tokenizer.decode(input);
     }
 }

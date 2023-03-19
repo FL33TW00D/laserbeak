@@ -31,12 +31,11 @@
     "@aws-sdk/util-create-request": "^3.292.0",
     "@aws-sdk/util-format-url": "^3.292.0",
     "@rumbl/rumble-wasm": "file:../rumble/target/pkg",
-    "@visheratin/tokenizers": "^0.1.5",
     "brotli-dec-wasm": "^1.3.3",
     "comlink": "^4.4.1",
-    "huggingface-tokenizers-bindings": "^0.1.0",
     "idb": "^7.1.1",
-    "pako": "^2.1.0"
+    "pako": "^2.1.0",
+    "@rumbl/wokenizers": "file:../wokenizers/target/pkg"
   },
   "files": [
     "dist/**/*"
