@@ -121,8 +121,9 @@ export default class ModelDB {
         let tensors = await this._getTensors(modelID!);
 
         //TODO: fix
+        let conf_key = model.replaceAll("_", "-");
         let config = await fetch(
-            `https://huggingface.co/google/flan-t5-small/raw/main/config.json`
+            `https://huggingface.co/google/${conf_key}/raw/main/config.json`
         )
             .then((resp) => resp.arrayBuffer())
             .then((buffer) => new Uint8Array(buffer));

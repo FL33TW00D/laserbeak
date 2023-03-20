@@ -39,7 +39,7 @@ const FLAN = () => {
         (async () => {
             let modelManager = new ModelManager(); 
             await modelManager.init();
-            let model = await modelManager.loadModel(AvailableModels.FLAN_T5_SMALL);
+            let model = await modelManager.loadModel(AvailableModels.FLAN_T5_BASE);
             console.log(model);
         })();
     });

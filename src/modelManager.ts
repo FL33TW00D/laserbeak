@@ -25,6 +25,6 @@ export class ModelManager {
             console.log(model_data);
             throw new Error("Model not found");
         }
-        await createSession(true, model_data)
+        await createSession(false, model_data)
     }
 }
