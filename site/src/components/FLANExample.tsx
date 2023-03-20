@@ -8,7 +8,7 @@ export const FLANExample = () => {
 };
 
 const FLAN = () => {
-    const [session, setSession] = useState<any | null>(null);
+    const [model, setModel] = useState<any | null>(null);
     const [inputText, setInputText] = useState<string>("");
     const [outputText, setOutputText] = useState<string>("");
 
@@ -19,11 +19,11 @@ const FLAN = () => {
     async function runSample() {
         setOutputText("");
         try {
-            if (!session || !inputText || inputText.length < 2) {
+            if (!model || !inputText || inputText.length < 2) {
                 return;
             }
             const start = performance.now();
-            await session.run(inputText, (input: string) => {
+            await model.run(inputText, (input: string) => {
                 setOutputText((prevState) => {
                     return prevState + " " + input;
                 });
@@ -39,8 +39,8 @@ const FLAN = () => {
         (async () => {
             let modelManager = new ModelManager(); 
             await modelManager.init();
-            let model = await modelManager.loadModel(AvailableModels.FLAN_T5_SMALL);
-            console.log(model);
+            let loadedModel = await modelManager.loadModel(AvailableModels.FLAN_T5_SMALL);
+            setModel(loadedModel);
         })();
     });
 
@@ -54,7 +54,7 @@ const FLAN = () => {
                     placeholder=""
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    disabled={session === null}
+                    disabled={model === null}
                 ></textarea>
 
                 <div className="flex flex-col items-center gap-2">
@@ -64,7 +64,7 @@ const FLAN = () => {
                             className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 "
                             onClick={() => runSample()}
                         >
-                            {session === null ? (
+                            {model === null ? (
                                 <div className="inline-flex">
                                     <svg
                                         className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
