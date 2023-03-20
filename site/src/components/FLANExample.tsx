@@ -38,7 +38,7 @@ const FLAN = () => {
     useMountEffectOnce(() => {
         (async () => {
             let session = new Session();
-            await session.init("flan_small_bundle.zip");
+            await session.init("test_archive.zip");
             setSession(session);
         })();
     });
