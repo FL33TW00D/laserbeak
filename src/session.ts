@@ -20,6 +20,10 @@ export class Session {
             .then((buffer) => new Uint8Array(buffer));
 
         await rumble.default();
+        console.log("About to create session");
+        console.log("Config: ", model.config);
+        console.log("Tensors: ", model.tensors);
+        console.log("0th tensor: ", model.tensors[0]);
         this.rumbleSession = await rumble.Session.fromComponents(
             encoder,
             decoder,

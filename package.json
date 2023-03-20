@@ -34,8 +34,8 @@
     "@rumbl/rumble-wasm": "file:../rumble/target/pkg",
     "@rumbl/wokenizers": "file:../wokenizers/target/pkg",
     "comlink": "^4.4.1",
+    "fflate": "^0.7.4",
     "idb": "^7.1.1",
-    "pako": "^2.1.0",
     "uuid": "^9.0.0"
   },
   "files": [
