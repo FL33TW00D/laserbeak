@@ -24,7 +24,7 @@ interface StoredTensor {
 interface ModelDBSchema extends DBSchema {
     models: {
         value: StoredModel;
-        key: string; 
+        key: string;
         indexes: { modelID: string };
     };
     tensors: {
@@ -52,6 +52,8 @@ export default class ModelDB {
         this.db = await openDB<ModelDBSchema>("models", 1, {
             upgrade(db) {
                 db.createObjectStore("models");
+                db.createObjectStore("tensors");
+                db.createObjectStore("availableModels");
             },
         });
     }
@@ -102,16 +104,22 @@ export default class ModelDB {
     async getModel(
         model: AvailableModels
     ): Promise<EncoderDecoder | undefined> {
+        console.log("Get Model");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
         const modelID = await this.db.get("availableModels", model);
+        let models = null;
         if (!modelID) {
+            console.log("Not in DB");
+            await this._fetch(model);
+            console.log(models);
             return;
         }
-        let models = await this._getModels(modelID);
+
         if (!models) {
-            models = await this._fetch(model);
+            console.log("Fetched but don't have");
+            return;
         }
 
         const tensors = await this._getTensors(modelID);
@@ -130,6 +138,8 @@ export default class ModelDB {
             return;
         }
         let modelID = uuidv4(); //Encoder and Decoder have same ID
+        console.log("inserting encoder decoder");
+        console.log(bundle);
         for (let [key, entry] of bundle as any) {
             let extension = key.split(".").pop();
             if (extension === "onnx") {
@@ -143,7 +153,7 @@ export default class ModelDB {
             } else {
                 let storedTensor = {
                     bytes: new Blob([entry.data]),
-                    modelID: modelID, 
+                    modelID: modelID,
                 };
 
                 this.db!.put("tensors", storedTensor, uuidv4());
@@ -153,20 +163,16 @@ export default class ModelDB {
 
     //Fetches a resource from the remote server
     //and stores it in the database
-    _fetch = async (
-        modelName: AvailableModels 
-    ): Promise<StoredModel | undefined | any> => {
+    _fetch = async (modelName: AvailableModels) => {
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
+        console.log("About to fetch");
         try {
-            let bytes = await fetch(`${this.remoteUrl}/${modelName}`)
+            let bytes = await fetch(`${this.remoteUrl}/${modelName}.zip`)
                 .then((resp) => resp.arrayBuffer())
                 .then((buffer) => new Uint8Array(buffer));
-            const extension = modelName.split(".").pop();
-            if (extension === "zip") {
-                unzip(bytes, this.insertEncoderDecoder);
-            }
+            unzip(bytes, this.insertEncoderDecoder);
         } catch (e) {
             console.log(e);
         }

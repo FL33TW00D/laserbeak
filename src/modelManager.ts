@@ -7,7 +7,7 @@ export enum AvailableModels {
     FLAN_T5_LARGE = "flan_t5_large",
 }
 
-export default class ModelManager {
+export class ModelManager {
     modelDB: ModelDB;
 
     constructor() {
@@ -19,7 +19,12 @@ export default class ModelManager {
         await this.modelDB.init();
     }
 
-    createModel = async (model: AvailableModels) => {
+    loadModel = async (model: AvailableModels) => {
         const model_data = await this.modelDB.getModel(model);
+        if (!model_data) {
+            console.log(model_data);
+            throw new Error("Model not found");
+        }
+        await createSession(true, model_data)
     }
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMountEffectOnce } from "../hooks/useMountEffectOnce";
 import samples from "./samples.json";
-import { Session } from "laserbeak";
+import { ModelManager, AvailableModels } from "laserbeak";
 
 export const FLANExample = () => {
     return <FLAN />;
@@ -37,9 +37,10 @@ const FLAN = () => {
 
     useMountEffectOnce(() => {
         (async () => {
-            let session = new Session();
-            await session.init("test_archive.zip");
-            setSession(session);
+            let modelManager = new ModelManager(); 
+            await modelManager.init();
+            let model = await modelManager.loadModel(AvailableModels.FLAN_T5_SMALL);
+            console.log(model);
         })();
     });
 
