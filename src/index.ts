@@ -1,1 +1,1 @@
-export { Session } from './session';
+export { ModelManager, AvailableModels } from './modelManager';

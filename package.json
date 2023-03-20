@@ -4,11 +4,19 @@
   "author": "Christopher Fleetwood",
   "description": "Access the Rumble API from the browser",
   "repository": "FL33TW00D/laserbeak",
+  "keywords": [
+    "rust",
+    "WebGPU",
+    "ML",
+    "Machine Learning",
+    "AI"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "devDependencies": {
     "@types/node": "^14.11.2",
     "@types/pako": "^2.0.0",
+    "@types/uuid": "^9.0.1",
     "typescript": "~4.7.0"
   },
   "scripts": {
@@ -17,10 +25,20 @@
     "lint": "eslint ./src"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity": "^3.292.0",
+    "@aws-sdk/client-s3": "^3.292.0",
+    "@aws-sdk/credential-provider-cognito-identity": "^3.292.0",
+    "@aws-sdk/s3-request-presigner": "^3.292.0",
+    "@aws-sdk/util-create-request": "^3.292.0",
+    "@aws-sdk/util-format-url": "^3.292.0",
     "@rumbl/rumble-wasm": "file:../rumble/target/pkg",
+    "@rumbl/wokenizers": "file:../wokenizers/target/pkg",
     "comlink": "^4.4.1",
+    "fflate": "^0.7.4",
     "idb": "^7.1.1",
-    "pako": "^2.1.0"
+    "uuid": "^9.0.0"
   },
-  "files": ["dist/**/*"]
+  "files": [
+    "dist/**/*"
+  ]
 }

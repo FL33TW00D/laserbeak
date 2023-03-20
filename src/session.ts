@@ -1,76 +1,52 @@
-import pako from 'pako';
-import * as Comlink from 'comlink';
-import * as rumble from '@rumbl/rumble-wasm';
-import ModelDB from './db';
+import * as Comlink from "comlink";
+import * as rumble from "@rumbl/rumble-wasm";
+import { EncoderDecoder } from "./modelDB";
 
 export class Session {
-  rumbleSession: rumble.Session | undefined;
-  modelDB: ModelDB;
+    rumbleSession: rumble.Session | undefined;
 
-  constructor() {
-    let modelDB = new ModelDB();
-    modelDB.init();
-    this.modelDB = modelDB;
-  }
-
-  _fetchBytes = async (url: string): Promise<Uint8Array> => {
-    try {
-        const cachedModel = await this.modelDB.get(url);
-        if (cachedModel) {
-            return new Uint8Array(await cachedModel.bytes.arrayBuffer()); 
-        }else {
-            let bytes = await fetch(url).then((resp) => resp.arrayBuffer());
-            const extension = url.split('.').pop();
-            if (extension === 'gz') {
-              bytes = pako.inflate(bytes);
-            }
-            const data = new Uint8Array(bytes);
-            await this.modelDB.set(url, new Blob([data]));
-            return data;
+    _initEncoderDecoder = async (model: EncoderDecoder) => {
+        if (model.models.length !== 2) {
+            throw Error(
+                "The model should have 2 components: encoder and decoder"
+            );
         }
-    } catch (e) {
-        console.log(e);
-        return new Uint8Array();
-    }
-  };
 
-  init = async (modelPath: string) => {
-    const [encoderBytes, decoderBytes, configBytes, tokenizerBytes] =
-      await Promise.all([
-        this._fetchBytes(
-          'https://rmbl.us/modified_flan-t5-small_encoder_decoder_init_fp32_sim.onnx.gz'
-        ),
-        this._fetchBytes(
-          'https://rmbl.us/modified_flan-t5-small_decoder_fp32_sim.onnx.gz'
-        ),
-        this._fetchBytes('resources/flan-t5/small/config.json'),
-        this._fetchBytes('resources/flan-t5/small/tokenizer.json'),
-      ]);
-    console.log('Initialized', {
-      encoderBytes,
-      decoderBytes,
-      configBytes,
-      tokenizerBytes,
-    });
-    await rumble.default();
-    this.rumbleSession = await rumble.Session.fromComponents(
-      encoderBytes,
-      decoderBytes,
-      configBytes,
-      tokenizerBytes
-    );
-  };
+        let encoder = await model.models[0].bytes
+            .arrayBuffer()
+            .then((buffer) => new Uint8Array(buffer));
+        let decoder = await model.models[1].bytes
+            .arrayBuffer()
+            .then((buffer) => new Uint8Array(buffer));
 
-  run = async (input: any): Promise<any> => {
-    if (!this.rumbleSession) {
-      throw Error(
-        'the session is not initialized. Call `init()` method first.'
-      );
-    }
-    return await this.rumbleSession.run(input);
-  };
+        await rumble.default();
+        this.rumbleSession = await rumble.Session.fromComponents(
+            encoder,
+            decoder,
+            model.config,
+            model.tensors
+        );
+    };
+
+    //TODO: generalize this
+    init = async (model: EncoderDecoder) => {
+        await this._initEncoderDecoder(model);
+    };
+
+    run = async (
+        input: Uint32Array,
+        callback: (token: number) => void
+    ): Promise<void> => {
+        if (!this.rumbleSession) {
+            throw Error(
+                "the session is not initialized. Call `init()` method first."
+            );
+        }
+
+        return await this.rumbleSession.stream(input, callback);
+    };
 }
 
-if (typeof self !== 'undefined') {
-  Comlink.expose(Session);
+if (typeof self !== "undefined") {
+    Comlink.expose(Session);
 }

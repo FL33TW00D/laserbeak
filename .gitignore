@@ -40,3 +40,4 @@ dist/**/*
 yarn.lock
 
 .next
+**/tokenizer.json
