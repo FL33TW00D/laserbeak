@@ -12,10 +12,11 @@ export class Session {
             );
         }
 
-        let encoder = await model.models[0].bytes
+        //TODO: inverted these indexes temporarily
+        let encoder = await model.models[1].bytes
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        let decoder = await model.models[1].bytes
+        let decoder = await model.models[0].bytes
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
 
@@ -24,6 +25,7 @@ export class Session {
             encoder,
             decoder,
             model.config,
+            model.tokenizer,
             model.tensors
         );
     };
@@ -34,8 +36,8 @@ export class Session {
     };
 
     run = async (
-        input: Uint32Array,
-        callback: (token: number) => void
+        input: string,
+        callback: (decoded: string) => void
     ): Promise<void> => {
         if (!this.rumbleSession) {
             throw Error(

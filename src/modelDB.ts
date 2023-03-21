@@ -8,12 +8,14 @@ export interface EncoderDecoder {
     models: StoredModel[];
     tensors: Map<string, Uint8Array>;
     config: Uint8Array;
+    tokenizer: Uint8Array;
 }
 
 export interface StoredModel {
     name: string;
     modelID: string; //Non unique, same for encoder and decoder
     bytes: Blob;
+    encoder: boolean;
 }
 
 interface StoredTensor {
@@ -121,9 +123,14 @@ export default class ModelDB {
         let tensors = await this._getTensors(modelID!);
 
         //TODO: fix
-        let conf_key = model.replaceAll("_", "-");
+        let hf_key = model.replaceAll("_", "-");
         let config = await fetch(
-            `https://huggingface.co/google/${conf_key}/raw/main/config.json`
+            `https://huggingface.co/google/${hf_key}/raw/main/config.json`
+        )
+            .then((resp) => resp.arrayBuffer())
+            .then((buffer) => new Uint8Array(buffer));
+        let tokenizer = await fetch(
+            `https://huggingface.co/google/${hf_key}/raw/main/tokenizer.json`
         )
             .then((resp) => resp.arrayBuffer())
             .then((buffer) => new Uint8Array(buffer));
@@ -132,6 +139,7 @@ export default class ModelDB {
             models: models,
             tensors: tensors,
             config: config,
+            tokenizer: tokenizer,
         };
     }
 
@@ -145,6 +153,7 @@ export default class ModelDB {
                     name: key,
                     modelID: modelID,
                     bytes: new Blob([bytes]),
+                    encoder: key.includes("encoder"),
                 };
 
                 this.db!.put("models", storedModel, uuidv4());

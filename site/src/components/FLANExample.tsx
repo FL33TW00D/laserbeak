@@ -10,9 +10,7 @@ export const FLANExample = () => {
 const FLAN = () => {
     const [model, setModel] = useState<any | null>(null);
     const [inputText, setInputText] = useState<string>("");
-    const [outputText, setOutputText] = useState<string>(
-        "This is a test of strength."
-    );
+    const [outputText, setOutputText] = useState<string>("");
 
     function randomSample() {
         setInputText(samples[Math.floor(Math.random() * samples.length)]);
@@ -26,9 +24,7 @@ const FLAN = () => {
             }
             const start = performance.now();
             await model.run(inputText, (input: string) => {
-                setOutputText((prevState) => {
-                    return prevState + " " + input;
-                });
+                setOutputText(input);
             });
             const duration = performance.now() - start;
             console.log("Inference time:", duration.toFixed(2), "ms");
@@ -68,7 +64,7 @@ const FLAN = () => {
                             onClick={() => runSample()}
                         >
                             {model === null ? (
-                                <div className="inline-flex">
+                                <div className="inline-flex px-4">
                                     <svg
                                         className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -101,12 +97,14 @@ const FLAN = () => {
                             className="relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium rounded-lg group bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white text-white focus:ring-4 focus:outline-none focus:ring-purple-800"
                             onClick={() => randomSample()}
                         >
-                                <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                            I&#39;m feeling lucky
-                                </span>
+                            <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                                I&#39;m feeling lucky
+                            </span>
                         </button>
                     </div>
-                    <div className="first-letter:uppercase text-white font-light text-lg">{outputText}</div>
+                    <div className="first-letter:uppercase text-white font-light text-lg">
+                        {outputText}
+                    </div>
                 </div>
             </div>
         </>
