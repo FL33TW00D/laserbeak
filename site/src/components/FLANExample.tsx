@@ -38,7 +38,7 @@ const FLAN = () => {
             let modelManager = new ModelManager();
             await modelManager.init();
             let loadedModel = await modelManager.loadModel(
-                AvailableModels.FLAN_T5_SMALL
+                AvailableModels.FLAN_T5_BASE
             );
             setModel(loadedModel);
         })();
