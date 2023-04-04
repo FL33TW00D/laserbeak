@@ -1,8 +1,8 @@
 {
   "name": "laserbeak",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Christopher Fleetwood",
-  "description": "Access the Rumble API from the browser",
+  "description": "ML on the GPU comes to the browser",
   "repository": "FL33TW00D/laserbeak",
   "keywords": [
     "rust",
@@ -32,7 +32,6 @@
     "@aws-sdk/util-create-request": "^3.292.0",
     "@aws-sdk/util-format-url": "^3.292.0",
     "@rumbl/rumble-wasm": "file:../rumble/target/pkg",
-    "@rumbl/wokenizers": "file:../wokenizers/target/pkg",
     "comlink": "^4.4.1",
     "fflate": "^0.7.4",
     "idb": "^7.1.1",
