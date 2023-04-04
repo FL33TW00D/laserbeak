@@ -2,6 +2,15 @@ import { useState } from "react";
 import { useMountEffectOnce } from "../hooks/useMountEffectOnce";
 import samples from "./samples.json";
 import { ModelManager, AvailableModels } from "laserbeak";
+import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
+
+const ReactQuill = dynamic(
+    () => {
+        return import("react-quill");
+    },
+    { ssr: false }
+);
 
 export const FLANExample = () => {
     return <FLAN />;
@@ -11,6 +20,7 @@ const FLAN = () => {
     const [model, setModel] = useState<any | null>(null);
     const [inputText, setInputText] = useState<string>("");
     const [outputText, setOutputText] = useState<string>("");
+    const [value, setValue] = useState("");
 
     function randomSample() {
         setInputText(samples[Math.floor(Math.random() * samples.length)]);
@@ -24,9 +34,7 @@ const FLAN = () => {
             }
             const start = performance.now();
             await model.run(inputText, (input: string) => {
-                setOutputText((prevState) => {
-                    return prevState + " " + input;
-                });
+                setOutputText(input);
             });
             const duration = performance.now() - start;
             console.log("Inference time:", duration.toFixed(2), "ms");
@@ -37,20 +45,25 @@ const FLAN = () => {
 
     useMountEffectOnce(() => {
         (async () => {
-            let modelManager = new ModelManager(); 
+            let modelManager = new ModelManager();
             await modelManager.init();
-            let loadedModel = await modelManager.loadModel(AvailableModels.FLAN_T5_BASE);
+            let loadedModel = await modelManager.loadModel(
+                AvailableModels.FLAN_T5_BASE
+            );
             setModel(loadedModel);
         })();
     });
 
     return (
         <>
+            <div className="bg-white">
+                <ReactQuill theme="snow" value={value} onChange={setValue} />
+            </div>
             <div>
                 <textarea
                     id="inp"
                     rows={8}
-                    className="mt-8 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-8 block p-2.5 w-full text-sm text-gray-100 font-light bg-zinc-800 rounded-lg border-zinc-600 border focus:outline-none focus:ring-2 focus:ring-purple-800 focus:border-transparent focus:duration-75 transition-all ease-in"
                     placeholder=""
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
@@ -60,12 +73,11 @@ const FLAN = () => {
                 <div className="flex flex-col items-center gap-2">
                     <div className="flex flex-row gap-2 mt-4">
                         <button
-                            type="button"
-                            className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 "
+                            className="relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium rounded-lg group bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white text-white focus:ring-4 focus:outline-none focus:ring-purple-800"
                             onClick={() => runSample()}
                         >
                             {model === null ? (
-                                <div className="inline-flex">
+                                <div className="inline-flex px-4">
                                     <svg
                                         className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -89,17 +101,23 @@ const FLAN = () => {
                                     Loading...{" "}
                                 </div>
                             ) : (
-                                <p>Run</p>
+                                <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                                    Run
+                                </span>
                             )}
                         </button>
                         <button
-                            className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 "
+                            className="relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium rounded-lg group bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white text-white focus:ring-4 focus:outline-none focus:ring-purple-800"
                             onClick={() => randomSample()}
                         >
-                            I&#39;m feeling lucky
+                            <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                                I&#39;m feeling lucky
+                            </span>
                         </button>
                     </div>
-                    <div className="first-letter:uppercase">{outputText}</div>
+                    <div className="first-letter:uppercase text-white font-light text-lg">
+                        {outputText}
+                    </div>
                 </div>
             </div>
         </>
