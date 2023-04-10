@@ -2,16 +2,6 @@ import { useState } from "react";
 import { useMountEffectOnce } from "../hooks/useMountEffectOnce";
 import samples from "./samples.json";
 import { ModelManager, AvailableModels } from "laserbeak";
-import "react-quill/dist/quill.snow.css";
-import dynamic from "next/dynamic";
-
-const ReactQuill = dynamic(
-    () => {
-        return import("react-quill");
-    },
-    { ssr: false }
-);
-
 export const FLANExample = () => {
     return <FLAN />;
 };
@@ -20,7 +10,6 @@ const FLAN = () => {
     const [model, setModel] = useState<any | null>(null);
     const [inputText, setInputText] = useState<string>("");
     const [outputText, setOutputText] = useState<string>("");
-    const [value, setValue] = useState("");
 
     function randomSample() {
         setInputText(samples[Math.floor(Math.random() * samples.length)]);
@@ -56,9 +45,6 @@ const FLAN = () => {
 
     return (
         <>
-            <div className="bg-white">
-                <ReactQuill theme="snow" value={value} onChange={setValue} />
-            </div>
             <div>
                 <textarea
                     id="inp"
