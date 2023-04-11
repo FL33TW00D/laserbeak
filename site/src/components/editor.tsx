@@ -30,9 +30,13 @@ const HoveringMenuExample = () => {
                         case "formatItalic":
                             event.preventDefault();
                             return toggleFormat(editor, "italic");
-                        case "formatUnderline":
+                        case "formatunderline":
+                            event.preventdefault();
+                            return toggleformat(editor, "underlined");
+                        case "summarize":
                             event.preventDefault();
-                            return toggleFormat(editor, "underlined");
+                            return handleSummarize(editor);
+                            
                     }
                 }}
                 style={{
@@ -41,6 +45,11 @@ const HoveringMenuExample = () => {
             />
         </Slate>
     );
+};
+
+const handleSummarize = (editor) => {
+    Transforms.delete(editor, { at: editor.selection });
+    Transforms.insertText(editor, "Summarized text");
 };
 
 const toggleFormat = (editor, format) => {
@@ -134,6 +143,7 @@ const HoveringToolbar = () => {
                 <FormatButton format="bold" icon="format_bold" />
                 <FormatButton format="italic" icon="format_italic" />
                 <FormatButton format="underlined" icon="format_underlined" />
+                <SummarizeButton />
             </Menu>
         </Portal>
     );
@@ -148,6 +158,18 @@ const FormatButton = ({ format, icon }) => {
             onClick={() => toggleFormat(editor, format)}
         >
             <Icon>{icon}</Icon>
+        </Button>
+    );
+};
+
+const SummarizeButton = () => {
+    const editor = useSlate();
+    return (
+        <Button
+            reversed
+            onClick={() => handleSummarize(editor)}
+        >
+            <Icon>{"summarize"}</Icon>
         </Button>
     );
 };
