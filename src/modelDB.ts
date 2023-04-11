@@ -74,11 +74,14 @@ export default class ModelDB {
 
         let tensorMap = new Map<string, Uint8Array>();
         console.log("Searching for tensors for Model ID: ", modelID);
+        let totalBytes = 0;
         for await (const cursor of index.iterate(modelID.toString())) {
-            tensorMap.set(cursor.value.name, cursor.value.bytes);
+            let bytes = cursor.value.bytes;
+            tensorMap.set(cursor.value.name, bytes);
+            totalBytes += bytes.length;
         }
-
         console.log("Found tensors: ", tensorMap);
+        console.log("Total tensor bytes: ", totalBytes);
 
         await tx.done;
 
