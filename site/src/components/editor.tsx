@@ -12,25 +12,11 @@ import { css } from "@emotion/css";
 import { withHistory } from "slate-history";
 
 import { Button, Icon, Menu, Portal } from "./components";
-import { useMountEffectOnce } from "../hooks/useMountEffectOnce";
-import { ModelManager, AvailableModels } from "laserbeak";
 
 const modelContext = React.createContext<any | null>(null);
 
-const HoveringMenuExample = () => {
+const SummizeEditor = ({ model }) => {
     const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-    const [model, setModel] = useState<any | null>(null);
-
-    useMountEffectOnce(() => {
-        (async () => {
-            let modelManager = new ModelManager();
-            await modelManager.init();
-            let loadedModel = await modelManager.loadModel(
-                AvailableModels.FLAN_T5_BASE
-            );
-            setModel(loadedModel);
-        })();
-    });
 
     return (
         <Slate editor={editor} value={initialValue}>
@@ -258,4 +244,4 @@ const initialValue: Descendant[] = [
     },
 ];
 
-export default HoveringMenuExample;
+export default SummizeEditor;

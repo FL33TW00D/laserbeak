@@ -16,6 +16,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-quill": "^2.0.0",
+    "react-responsive-modal": "^6.4.1",
     "slate-history": "^0.93.0",
     "slate-react": "^0.93.0"
   },
