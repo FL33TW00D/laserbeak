@@ -4,7 +4,7 @@ import Image from "next/image";
 
 interface ModalProps {
     onAccept: () => void;
-};
+}
 
 const ChromeDownloadModal = (props: ModalProps) => {
     const [isChrome, setIsChrome] = useState<boolean>(false);
@@ -31,18 +31,41 @@ const ChromeDownloadModal = (props: ModalProps) => {
                 onClose={handleModalClose}
             >
                 {isChrome ? (
-                    <div className="flex flex-col h-full text-center">
-                        <h2>
-                            Summize is a demo of laserbeak & rumble, my 2 libraries for running large machine learning models on the web.
-                            You can select text and click the "Summarize" button to instantly summarize documents.
-
-                            You can read more about it in my blog post here.
-                            <br />
-                            On first load, this site performs a 900+MB download.
-                            <br />
-                            Please press "Yes" to continue.
+                    <div className="flex h-full w-full flex-col text-center items-center justify-center prose">
+                        <h2 className="text-2xl font-bold pb-4">
+                            Welcome to Summize!
                         </h2>
-                        <button onClick={handleModalClose}>Yes</button>
+                        <p>
+                            Summize is a demo of my Rust + WebGPU ML model
+                            runtime. In this demo it is running a 250M parameter
+                            LLM.
+                        </p>
+                        <p>
+                            When you press continue, this site performs a 900+MB download.
+                            Please be patient while the model is downloaded.
+                        </p>
+                        <div className="flex flex-row gap-x-2">
+                            <button
+                                onClick={handleModalClose}
+                                className="hover group mb-2 inline-flex max-w-xs items-center rounded-lg border py-3 px-4 text-lg shadow-sm duration-150"
+                            >
+                                Continue
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="ml-2 h-8 w-8 transform duration-200 group-hover:translate-x-0.5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={1}
+                                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <div className="flex flex-col h-full text-center">
