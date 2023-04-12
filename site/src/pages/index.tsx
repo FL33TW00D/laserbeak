@@ -38,12 +38,12 @@ const Home: NextPage = () => {
 
             <main className="min-h-screen flex flex-1 flex-col bg-dark">
                 <div className="flex-1">
-                    <h1 className="text-xl md:text-2xl font-medium tracking-tight text-white pl-4 py-4">
-                        Summize
-                    </h1>
+                    <div className="flex flex-col text-center bg-yellow-50 py-2 ">
+                        <h1 className="font-black">summize</h1>
+                    </div>
                     <div className="mx-auto flex flex-1 flex-col justify-center content-center align-center h-full w-full">
-                        <div className="text-center bg-white flex flex-1 px-4 py-8">
-                            <div className="flex flex-1 max-w-5xl mx-auto">
+                        <div className="text-center bg-stone-50 flex flex-1 pt-16">
+                            <div className="flex flex-1 max-w-6xl mx-auto bg-white py-12 px-8 rounded-t-md shadow-lg">
                                 <SummizeEditor model={model} />
                             </div>
                         </div>

@@ -33,6 +33,11 @@ const ChromeDownloadModal = (props: ModalProps) => {
                 {isChrome ? (
                     <div className="flex flex-col h-full text-center">
                         <h2>
+                            Summize is a demo of laserbeak & rumble, my 2 libraries for running large machine learning models on the web.
+                            You can select text and click the "Summarize" button to instantly summarize documents.
+
+                            You can read more about it in my blog post here.
+                            <br />
                             On first load, this site performs a 900+MB download.
                             <br />
                             Please press "Yes" to continue.
