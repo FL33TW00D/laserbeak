@@ -36,20 +36,20 @@ const Home: NextPage = () => {
                 }}
             />
 
-            <main className="min-h-screen flex flex-1 flex-col bg-dark">
+            <main className="min-h-screen flex flex-1 flex-col">
                 <div className="flex-1">
-                    <div className="flex flex-col text-center bg-yellow-50 py-2 ">
+                    <div className="flex flex-col text-center bg-dark py-2">
                         <h1 className="font-black">summize</h1>
                     </div>
                     <div className="mx-auto flex flex-1 flex-col justify-center content-center align-center h-full w-full">
-                        <div className="text-center bg-stone-50 flex flex-1 pt-16">
-                            <div className="flex flex-1 max-w-6xl mx-auto bg-white py-12 px-8 rounded-t-md shadow-lg">
+                        <div className="text-center bg-stone-50 flex flex-1 py-16">
+                            <div className="flex flex-1 max-w-5xl 2xl:max-w-6xl mx-auto bg-white py-12 px-8 rounded-t-md shadow-lg">
                                 <SummizeEditor model={model} />
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-col text-center">
-                        <div className="flex h-full flex-col justify-between gap-y-4 pt-4 pb-6 text-sm md:col-span-1">
+                    <div className="flex flex-col text-center bg-dark">
+                        <div className="flex h-full flex-col justify-between gap-y-4 py-12 text-sm md:col-span-1">
                             <span className="font-extralight text-white">
                                 Built by{" "}
                                 <a
