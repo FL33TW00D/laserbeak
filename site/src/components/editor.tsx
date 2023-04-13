@@ -170,7 +170,7 @@ const handleSummarize = (model: any, editor: Editor) => {
     runSample(model, editor, input_text, editor.selection);
 };
 
-const toggleFormat = (editor: Editor, format) => {
+const toggleFormat = (editor: Editor, format: string) => {
     const isActive = isFormatActive(editor, format);
     Transforms.setNodes(
         editor,
@@ -179,7 +179,7 @@ const toggleFormat = (editor: Editor, format) => {
     );
 };
 
-const isFormatActive = (editor: Editor, format) => {
+const isFormatActive = (editor: Editor, format: string) => {
     const [match] = Editor.nodes(editor, {
         match: (n) => n[format] === true,
         mode: "all",
