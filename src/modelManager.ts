@@ -19,12 +19,14 @@ export class ModelManager {
         await this.modelDB.init();
     }
 
-    loadModel = async (model: AvailableModels) => {
+    loadModel = async (model: AvailableModels, onLoaded: () => void) => {
         const model_data = await this.modelDB.getModel(model);
         if (!model_data) {
             console.log(model_data);
             throw new Error("Model not found");
         }
-        return await createSession(false, model_data);
+        let session = await createSession(false, model_data);
+        onLoaded();
+        return session;
     }
 }
