@@ -25,7 +25,7 @@ export const Button = React.forwardRef(
   ) => (
     <span
       {...props}
-      ref={ref}
+      ref={ref as Ref<HTMLSpanElement>}
       className={cx(
         className,
         css`
@@ -42,6 +42,7 @@ export const Button = React.forwardRef(
     />
   )
 )
+Button.displayName = 'Button';
 
 export const EditorValue = React.forwardRef(
   (
@@ -57,12 +58,12 @@ export const EditorValue = React.forwardRef(
     ref: Ref<OrNull<null>>
   ) => {
     const textLines = value.document.nodes
-      .map(node => node.text)
+    .map((node: any) => node.text)
       .toArray()
       .join('\n')
     return (
       <div
-        ref={ref}
+        ref={ref as Ref<HTMLDivElement>}
         {...props}
         className={cx(
           className,
@@ -80,7 +81,7 @@ export const EditorValue = React.forwardRef(
             background: #f8f8f8;
           `}
         >
-          Slate's value as text
+          Slate&apos;s value as text
         </div>
         <div
           className={css`
@@ -99,6 +100,7 @@ export const EditorValue = React.forwardRef(
     )
   }
 )
+EditorValue.displayName = 'EditorValue';
 
 export const Icon = React.forwardRef(
   (
@@ -107,7 +109,7 @@ export const Icon = React.forwardRef(
   ) => (
     <span
       {...props}
-      ref={ref}
+      ref={ref as Ref<HTMLSpanElement>}
       className={cx(
         'material-icons',
         className,
@@ -119,6 +121,7 @@ export const Icon = React.forwardRef(
     />
   )
 )
+Icon.displayName = 'Icon';
 
 export const Instruction = React.forwardRef(
   (
@@ -127,7 +130,7 @@ export const Instruction = React.forwardRef(
   ) => (
     <div
       {...props}
-      ref={ref}
+      ref={ref as Ref<HTMLDivElement>}
       className={cx(
         className,
         css`
@@ -141,6 +144,7 @@ export const Instruction = React.forwardRef(
     />
   )
 )
+Instruction.displayName = 'Instruction';
 
 export const Menu = React.forwardRef(
   (
@@ -150,7 +154,7 @@ export const Menu = React.forwardRef(
     <div
       {...props}
       data-test-id="menu"
-      ref={ref}
+      ref={ref as Ref<HTMLDivElement>}
       className={cx(
         className,
         css`
@@ -166,6 +170,7 @@ export const Menu = React.forwardRef(
     />
   )
 )
+Menu.displayName = 'Menu';
 
 export const Portal = ({ children }: { children: React.ReactNode }) => {
 	const [portal, setPortal] = React.useState(false);
@@ -176,6 +181,7 @@ export const Portal = ({ children }: { children: React.ReactNode }) => {
 
 	return portal ? ReactDOM.createPortal(children, document.body) : null;
 };
+Portal.displayName = 'Portal';
 
 export const Toolbar = React.forwardRef(
   (
@@ -184,7 +190,7 @@ export const Toolbar = React.forwardRef(
   ) => (
     <Menu
       {...props}
-      ref={ref}
+      ref={ref as Ref<HTMLDivElement>}
       className={cx(
         className,
         css`
@@ -198,3 +204,4 @@ export const Toolbar = React.forwardRef(
     />
   )
 )
+Toolbar.displayName = 'Toolbar';

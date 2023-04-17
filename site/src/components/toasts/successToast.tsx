@@ -1,4 +1,5 @@
 import MainToast from "./toast";
+import React from "react";
 
 interface ToastProps {
   toast: any;

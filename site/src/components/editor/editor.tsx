@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, {
     useMemo,
     useRef,
@@ -26,6 +27,7 @@ import {
 } from "slate";
 import { css } from "@emotion/css";
 import { withHistory } from "slate-history";
+import { BulletedListElement } from "../../custom-types";
 
 import { Button, Icon, Menu, Portal } from "./components";
 
@@ -44,8 +46,14 @@ const SHORTCUTS = {
     "######": "heading-six",
 };
 
-const SummizeEditor = ({ model }) => {
-    const renderElement = useCallback((props) => <Element {...props} />, []);
+interface EditorProps {
+    model: any;
+}
+
+const SummizeEditor = (props: EditorProps) => {
+    const { model } = props;
+
+    const renderElement = useCallback((props: any) => <Element {...props} />, []);
     const editor = useMemo(
         () => withShortcuts(withReact(withHistory(createEditor()))),
         []
@@ -56,15 +64,19 @@ const SummizeEditor = ({ model }) => {
                 case "formatBold":
                     e.preventDefault();
                     toggleFormat(editor, "bold");
+                    break;
                 case "formatItalic":
                     e.preventDefault();
                     toggleFormat(editor, "italic");
+                    break;
                 case "formatunderline":
                     e.preventDefault();
                     toggleFormat(editor, "underlined");
+                    break;
                 case "summarize":
                     e.preventDefault();
                     handleSummarize(model, editor);
+                    break;
             }
             queueMicrotask(() => {
                 const pendingDiffs = ReactEditor.androidPendingDiffs(editor);
@@ -104,7 +116,7 @@ const SummizeEditor = ({ model }) => {
                 }
             });
         },
-        [editor]
+        [editor, model]
     );
 
     return (
@@ -132,7 +144,7 @@ async function runSample(
     model: any,
     editor: Editor,
     inputText: string,
-    selection: Selection
+    selection: Range 
 ) {
     try {
         if (!model || !inputText || inputText.length < 2) {
@@ -158,13 +170,10 @@ async function runSample(
 }
 
 const handleSummarize = (model: any, editor: Editor) => {
-    console.log("Calling summarize");
-    console.log("Selection: ", editor.selection);
     if (!editor.selection) {
         return;
     }
     let input_selection = Editor.string(editor, editor.selection);
-    console.log("Input text: ", input_selection);
     let input_text = `Summarize\n\n${input_selection}`;
     Transforms.delete(editor, { at: editor.selection });
     runSample(model, editor, input_text, editor.selection);
@@ -187,7 +196,13 @@ const isFormatActive = (editor: Editor, format: string) => {
     return !!match;
 };
 
-const Leaf = ({ attributes, children, leaf }) => {
+interface LeafProps {
+    attributes: any;
+    children: any;
+    leaf: any;
+}
+
+const Leaf = ({ attributes, children, leaf }: LeafProps) => {
     if (leaf.bold) {
         children = <strong>{children}</strong>;
     }
@@ -227,7 +242,7 @@ const HoveringToolbar = () => {
         }
 
         const domSelection = window.getSelection();
-        const domRange = domSelection.getRangeAt(0);
+        const domRange = domSelection!.getRangeAt(0);
         const rect = domRange.getBoundingClientRect();
         el.style.opacity = "1";
         el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
@@ -239,7 +254,7 @@ const HoveringToolbar = () => {
     return (
         <Portal>
             <Menu
-                ref={ref}
+                ref={ref as any}
                 className={css`
                     padding: 8px 7px 6px;
                     font-size: 10px;

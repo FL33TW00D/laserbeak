@@ -13,6 +13,9 @@ const ChromeDownloadModal = (props: ModalProps) => {
     useEffect(() => {
         const chromeVersion =
             window.navigator.userAgent.match(/Chrome\/([0-9]+)/);
+        if (!chromeVersion) {
+            return;
+        }
         setIsChrome(chromeVersion && Number(chromeVersion[1]) >= 113);
     }, []);
 

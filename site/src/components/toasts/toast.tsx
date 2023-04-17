@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import React from "react";
 
 interface ToastProps {
   toast: any;
