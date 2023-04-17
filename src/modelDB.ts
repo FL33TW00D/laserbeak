@@ -1,8 +1,6 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
 import { v4 as uuidv4 } from "uuid";
 import { AvailableModels } from "./modelManager";
-import { Unzipped, unzipSync } from "fflate";
-import EncoderDecoder from "./encoderDecoder";
 
 export interface EncoderDecoder {
     name: string;
@@ -13,7 +11,7 @@ export interface EncoderDecoder {
     tokenizer: Uint8Array;
 }
 
-export interface StoredModel {
+interface StoredModel {
     name: string;
     modelID: string; //Non unique, same for encoder and decoder
     bytes: Blob;
@@ -22,6 +20,16 @@ export interface StoredModel {
 
 interface StoredTensor {
     name: string;
+    bytes: Uint8Array;
+    modelID: string;
+}
+
+interface StoredConfig {
+    bytes: Uint8Array;
+    modelID: string;
+}
+
+interface StoredTokenizer {
     bytes: Uint8Array;
     modelID: string;
 }
@@ -42,12 +50,12 @@ interface ModelDBSchema extends DBSchema {
         key: AvailableModels;
     };
     config: {
-        value: Uint8Array;
+        value: StoredConfig;
         key: string;
         indexes: { modelID: string };
     };
     tokenizer: {
-        value: Uint8Array;
+        value: StoredTokenizer;
         key: string;
         indexes: { modelID: string };
     };
@@ -124,7 +132,7 @@ export default class ModelDB {
         return models;
     }
 
-    async _getConfig(modelID: string): Promise<Uint8Array> {
+    async _getConfig(modelID: string): Promise<StoredConfig> {
         console.log("Attempting to get config");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
@@ -142,7 +150,7 @@ export default class ModelDB {
         return config[0];
     }
 
-    async _getTokenizer(modelID: string): Promise<Uint8Array> {
+    async _getTokenizer(modelID: string): Promise<StoredTokenizer> {
         console.log("Attempting to get tokenizer");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
@@ -170,7 +178,7 @@ export default class ModelDB {
         let modelID = await this.db.get("availableModels", model);
         console.log("Found existing model ID: ", modelID);
         if (!modelID) {
-            await this._fetch(model);
+            await this._fetchBundle(model);
             modelID = await this.db.get("availableModels", model);
         }
 
@@ -189,14 +197,14 @@ export default class ModelDB {
         let config = await this._getConfig(modelID!);
         let tokenizer = await this._getTokenizer(modelID!);
 
-        return new EncoderDecoder(
-            model,
-            encoder,
-            decoder,
-            tensors,
-            config,
-            tokenizer
-        );
+        return {
+            name: model,
+            encoder: encoder,
+            decoder: decoder,
+            tensors: tensors,
+            config: config.bytes,
+            tokenizer: tokenizer.bytes,
+        };
     }
 
     async insertModel(
@@ -232,11 +240,10 @@ export default class ModelDB {
 
     //Fetches a resource from the remote server
     //and stores it in the database
-    _fetch = async (modelName: AvailableModels) => {
+    _fetchBundle = async (modelName: AvailableModels) => {
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
-        console.log("About to fetch");
         try {
             let modelID = uuidv4(); //Encoder and Decoder have same ID
             this.db!.put("availableModels", modelID, modelName);
@@ -251,7 +258,8 @@ export default class ModelDB {
                 )
                     .then((resp) => resp.arrayBuffer())
                     .then((buffer) => new Uint8Array(buffer));
-                this.insertModel(model, index, modelName, bytes);
+                console.log("Storing model: ", model);
+                this.insertModel(model, index, modelID, bytes);
             }
 
             for (let tensor of model_definition.tensors) {
@@ -260,7 +268,8 @@ export default class ModelDB {
                 )
                     .then((resp) => resp.arrayBuffer())
                     .then((buffer) => new Uint8Array(buffer));
-                this.insertTensor(tensor, modelName, bytes);
+                console.log("Storing tensor: ", tensor);
+                this.insertTensor(tensor, modelID, bytes);
             }
 
             let config = await fetch(
@@ -269,14 +278,28 @@ export default class ModelDB {
                 .then((resp) => resp.arrayBuffer())
                 .then((buffer) => new Uint8Array(buffer));
 
-            this.db!.put("config", config, modelName);
+            this.db!.put(
+                "config",
+                {
+                    bytes: config,
+                    modelID: modelID,
+                },
+                modelID
+            );
 
             let tokenizer = await fetch(
                 `${this.remoteUrl}/${modelName}/tokenizer.json`
             )
                 .then((resp) => resp.arrayBuffer())
                 .then((buffer) => new Uint8Array(buffer));
-            this.db!.put("tokenizer", tokenizer, modelName);
+            this.db!.put(
+                "tokenizer",
+                {
+                    bytes: tokenizer,
+                    modelID: modelID,
+                },
+                modelID
+            );
         } catch (e) {
             console.log(e);
         }

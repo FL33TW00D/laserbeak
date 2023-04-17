@@ -6,23 +6,10 @@ export class Session {
     rumbleSession: rumble.Session | undefined;
 
     _initEncoderDecoder = async (model: EncoderDecoder) => {
-        if (model.models.length !== 2) {
-            throw Error(
-                "The model should have 2 components: encoder and decoder"
-            );
-        }
-
-        let encoder = await model.models[0].bytes
-            .arrayBuffer()
-            .then((buffer) => new Uint8Array(buffer));
-        let decoder = await model.models[1].bytes
-            .arrayBuffer()
-            .then((buffer) => new Uint8Array(buffer));
-
         await rumble.default();
         this.rumbleSession = await rumble.Session.fromComponents(
-            encoder,
-            decoder,
+            model.encoder,
+            model.decoder,
             model.config,
             model.tokenizer,
             model.tensors
