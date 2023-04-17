@@ -21,20 +21,22 @@ const ChromeDownloadModal = (props: ModalProps) => {
 
     const handleModalClose = () => {
         setIsModalOpen(false);
-        props.onAccept();
+        if (isChrome) {
+            props.onAccept();
+        }
     };
 
     return (
         <>
             <Modal
                 classNames={{
-                    modal: "rounded-lg w-1/2 md:w-1/2 xl:w-1/3 2xl:w-1/4 h-1/2 overflow-x-hidden",
+                    modal: "rounded-lg w-1/2 md:w-1/2 xl:w-1/3 2xl:w-1/4 h-3/4 md:h-2/3 2xl:h-1/2 overflow-x-hidden",
                 }}
                 open={isModalOpen}
                 onClose={handleModalClose}
             >
                 {isChrome ? (
-                    <div className="flex h-full w-full flex-col text-center items-center justify-center prose">
+                    <div className="flex h-full w-full flex-col text-center items-center justify-center prose p-4">
                         <h2 className="text-2xl font-bold pb-4">
                             Welcome to Summize!
                         </h2>
@@ -44,8 +46,9 @@ const ChromeDownloadModal = (props: ModalProps) => {
                             LLM.
                         </p>
                         <p>
-                            When you press continue, this site performs a 900+MB download.
-                            Please be patient while the model is downloaded.
+                            When you press continue, this site performs a 900+MB
+                            download. Please be patient while the model is
+                            downloaded.
                         </p>
                         <div className="flex flex-row gap-x-2">
                             <button
