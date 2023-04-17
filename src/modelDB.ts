@@ -2,62 +2,75 @@ import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
 import { v4 as uuidv4 } from "uuid";
 import { AvailableModels } from "./modelManager";
 
+export interface Model {
+    name: string;
+    definition: Uint8Array;
+    tensors: Map<string, Uint8Array>;
+    config?: Uint8Array;
+    tokenizer?: Uint8Array;
+}
+
 export interface EncoderDecoder {
     name: string;
-    encoder: Uint8Array;
-    decoder: Uint8Array;
-    tensors: Map<string, Uint8Array>;
+    encoder: Model;
+    decoder: Model;
     config: Uint8Array;
     tokenizer: Uint8Array;
 }
 
+///A model represents a single ONNX model
+///It may be a sub-component of a larger model
 interface StoredModel {
     name: string;
-    modelID: string; //Non unique, same for encoder and decoder
+    parentID: string; //Non unique, same for encoder and decoder
     bytes: Blob;
     index: number; //Encoder 0, Decoder 1, etc
+    tensorIDs: string[]; //IDs of the tensors associated with this model
+}
+
+interface ModelWithKey {
+    id: string; //id of the model sub-component
+    model: StoredModel;
 }
 
 interface StoredTensor {
     name: string;
     bytes: Uint8Array;
-    modelID: string;
 }
 
 interface StoredConfig {
     bytes: Uint8Array;
-    modelID: string;
+    parentID: string;
 }
 
 interface StoredTokenizer {
     bytes: Uint8Array;
-    modelID: string;
+    parentID: string;
 }
 
 interface ModelDBSchema extends DBSchema {
     models: {
         value: StoredModel;
         key: string;
-        indexes: { modelID: string };
+        indexes: { parentID: string; tensorsIDs: string[] };
     };
     tensors: {
         value: StoredTensor;
         key: string;
-        indexes: { modelID: string };
     };
     availableModels: {
-        value: string; //modelID
+        value: string; //parentID
         key: AvailableModels;
     };
     config: {
         value: StoredConfig;
         key: string;
-        indexes: { modelID: string };
+        indexes: { parentID: string };
     };
     tokenizer: {
         value: StoredTokenizer;
         key: string;
-        indexes: { modelID: string };
+        indexes: { parentID: string };
     };
 }
 
@@ -74,36 +87,37 @@ export default class ModelDB {
     async init() {
         this.db = await openDB<ModelDBSchema>("models", 1, {
             upgrade(db) {
-                let model_store = db.createObjectStore("models");
-                model_store.createIndex("modelID", "modelID");
-                let tensor_store = db.createObjectStore("tensors");
-                tensor_store.createIndex("modelID", "modelID");
+                db.createObjectStore("tensors");
                 db.createObjectStore("availableModels");
+
+                let model_store = db.createObjectStore("models");
+                model_store.createIndex("parentID", "parentID");
                 let config_store = db.createObjectStore("config");
-                config_store.createIndex("modelID", "modelID");
+                config_store.createIndex("parentID", "parentID");
                 let tokenizer_store = db.createObjectStore("tokenizer");
-                tokenizer_store.createIndex("modelID", "modelID");
+                tokenizer_store.createIndex("parentID", "parentID");
             },
         });
     }
 
-    async _getTensors(modelID: string): Promise<Map<string, Uint8Array>> {
+    async _getTensors(tensorIDs: string[]): Promise<Map<string, Uint8Array>> {
         console.log("Attempting to get tensors");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
 
         const tx = this.db.transaction("tensors", "readonly");
-        const index = tx.store.index("modelID");
-
         let tensorMap = new Map<string, Uint8Array>();
-        console.log("Searching for tensors for Model ID: ", modelID);
         let totalBytes = 0;
-        for await (const cursor of index.iterate(modelID.toString())) {
-            let bytes = cursor.value.bytes;
-            tensorMap.set(cursor.value.name, bytes);
-            totalBytes += bytes.length;
+        for (let id of tensorIDs) {
+            let tensor = await tx.store.get(id);
+            if (!tensor) {
+                throw new Error("Could not find tensor with ID: " + id);
+            }
+            tensorMap.set(tensor.name, tensor.bytes);
+            totalBytes += tensor.bytes.length;
         }
+
         console.log("Found tensors: ", tensorMap);
         console.log("Total tensor bytes: ", totalBytes);
 
@@ -112,27 +126,27 @@ export default class ModelDB {
         return tensorMap;
     }
 
-    async _getModels(modelID: string): Promise<StoredModel[]> {
+    async _getModels(parentID: string): Promise<ModelWithKey[]> {
         console.log("Attempting to get models");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
 
         const tx = this.db.transaction("models", "readonly");
-        const index = tx.store.index("modelID");
+        const index = tx.store.index("parentID");
 
-        const models: StoredModel[] = [];
-        for await (const cursor of index.iterate(modelID.toString())) {
-            models.push(cursor.value);
+        let models: ModelWithKey[] = [];
+        for await (const cursor of index.iterate(parentID.toString())) {
+            models.push({ id: cursor.key, model: cursor.value });
         }
 
         await tx.done;
 
-        models.sort((a, b) => a.index - b.index);
+        models.sort((a, b) => a.model.index - b.model.index);
         return models;
     }
 
-    async _getConfig(modelID: string): Promise<StoredConfig> {
+    async _getConfig(parentID: string): Promise<StoredConfig> {
         console.log("Attempting to get config");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
@@ -140,8 +154,8 @@ export default class ModelDB {
 
         let config = await this.db.getAllFromIndex(
             "config",
-            "modelID",
-            modelID.toString()
+            "parentID",
+            parentID.toString()
         );
         if (config.length !== 1) {
             throw new Error("Expected 1 config, got " + config.length);
@@ -150,7 +164,7 @@ export default class ModelDB {
         return config[0];
     }
 
-    async _getTokenizer(modelID: string): Promise<StoredTokenizer> {
+    async _getTokenizer(parentID: string): Promise<StoredTokenizer> {
         console.log("Attempting to get tokenizer");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
@@ -158,8 +172,8 @@ export default class ModelDB {
 
         let tokenizer = await this.db.getAllFromIndex(
             "tokenizer",
-            "modelID",
-            modelID.toString()
+            "parentID",
+            parentID.toString()
         );
         if (tokenizer.length !== 1) {
             throw new Error("Expected 1 tokenizer, got " + tokenizer.length);
@@ -175,56 +189,74 @@ export default class ModelDB {
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
-        let modelID = await this.db.get("availableModels", model);
-        console.log("Found existing model ID: ", modelID);
-        if (!modelID) {
+        let parentID = await this.db.get("availableModels", model);
+        console.log("Found existing model ID: ", parentID);
+        if (!parentID) {
             await this._fetchBundle(model);
-            modelID = await this.db.get("availableModels", model);
+            parentID = await this.db.get("availableModels", model);
         }
 
-        let models = await this._getModels(modelID!);
+        let models = await this._getModels(parentID!);
         if (models.length !== 2) {
             throw new Error("Expected 2 models, got " + models.length);
         }
 
-        let encoder = await models[0].bytes.arrayBuffer().then((buffer) => {
-            return new Uint8Array(buffer);
-        });
-        let decoder = await models[1].bytes.arrayBuffer().then((buffer) => {
-            return new Uint8Array(buffer);
-        });
-        let tensors = await this._getTensors(modelID!);
-        let config = await this._getConfig(modelID!);
-        let tokenizer = await this._getTokenizer(modelID!);
+        let encoder = models[0];
+        let decoder = models[1];
+
+        let encoderTensors = await this._getTensors(encoder.model.tensorIDs);
+        console.log("Encoder tensors length: ", encoderTensors.size);
+        let decoderTensors = await this._getTensors(decoder.model.tensorIDs);
+        console.log("Decoder tensors length: ", decoderTensors.size);
+
+        let encoderDefinition = await encoder.model.bytes
+            .arrayBuffer()
+            .then((buffer) => new Uint8Array(buffer));
+        let decoderDefinition = await decoder.model.bytes
+            .arrayBuffer()
+            .then((buffer) => new Uint8Array(buffer));
+
+        let config = await this._getConfig(parentID!);
+        let tokenizer = await this._getTokenizer(parentID!);
 
         return {
             name: model,
-            encoder: encoder,
-            decoder: decoder,
-            tensors: tensors,
+            encoder: {
+                name: encoder.model.name,
+                definition: encoderDefinition,
+                tensors: encoderTensors,
+            },
+            decoder: {
+                name: decoder.model.name,
+                definition: decoderDefinition,
+                tensors: decoderTensors,
+            },
             config: config.bytes,
             tokenizer: tokenizer.bytes,
         };
     }
 
     async insertModel(
-        name: string,
+        definition: string,
+        tensorIDs: string[],
         index: number,
-        modelID: string,
+        parentID: string,
         bytes: Uint8Array
-    ) {
+    ): Promise<string> {
         let storedModel = {
-            name: name,
-            modelID: modelID,
+            name: definition,
+            tensorIDs: tensorIDs,
+            parentID: parentID,
             bytes: new Blob([bytes]),
             index: index,
         };
 
-        this.db!.put("models", storedModel, uuidv4());
+        let componentID = uuidv4();
+        this.db!.put("models", storedModel, componentID);
+        return componentID;
     }
 
-    async insertTensor(key: string, modelID: string, bytes: Uint8Array) {
-        console.log("Stored tensor key: ", key);
+    async insertTensor(key: string, bytes: Uint8Array): Promise<string> {
         let tensor_name = key.split("/").pop();
         if (!tensor_name) {
             throw new Error("Could not parse tensor name");
@@ -232,10 +264,11 @@ export default class ModelDB {
         let storedTensor = {
             name: tensor_name,
             bytes: bytes,
-            modelID: modelID,
         };
 
-        this.db!.put("tensors", storedTensor, uuidv4());
+        let tensorID = uuidv4();
+        this.db!.put("tensors", storedTensor, tensorID);
+        return tensorID;
     }
 
     //Fetches a resource from the remote server
@@ -245,31 +278,39 @@ export default class ModelDB {
             throw new Error("ModelDB not initialized");
         }
         try {
-            let modelID = uuidv4(); //Encoder and Decoder have same ID
-            this.db!.put("availableModels", modelID, modelName);
+            let parentID = uuidv4();
+            this.db!.put("availableModels", parentID, modelName);
 
             let model_definition = await fetch(
                 `${this.remoteUrl}/${modelName}/model_definition.json`
             ).then((resp) => resp.json());
 
             for (let [index, model] of model_definition.models.entries()) {
+                let tensorIDs: string[] = [];
+                for (let tensor of model.tensors) {
+                    let bytes = await fetch(
+                        `${this.remoteUrl}/${modelName}/${tensor}`
+                    )
+                        .then((resp) => resp.arrayBuffer())
+                        .then((buffer) => new Uint8Array(buffer));
+                    console.log("Storing tensor: ", tensor);
+                    let tensorID = await this.insertTensor(tensor, bytes);
+                    tensorIDs.push(tensorID);
+                }
+
                 let bytes = await fetch(
-                    `${this.remoteUrl}/${modelName}/${model}`
+                    `${this.remoteUrl}/${modelName}/${model.definition}`
                 )
                     .then((resp) => resp.arrayBuffer())
                     .then((buffer) => new Uint8Array(buffer));
                 console.log("Storing model: ", model);
-                this.insertModel(model, index, modelID, bytes);
-            }
-
-            for (let tensor of model_definition.tensors) {
-                let bytes = await fetch(
-                    `${this.remoteUrl}/${modelName}/${tensor}`
-                )
-                    .then((resp) => resp.arrayBuffer())
-                    .then((buffer) => new Uint8Array(buffer));
-                console.log("Storing tensor: ", tensor);
-                this.insertTensor(tensor, modelID, bytes);
+                let modelID = await this.insertModel(
+                    model.definition,
+                    tensorIDs,
+                    index,
+                    parentID,
+                    bytes
+                );
             }
 
             let config = await fetch(
@@ -282,9 +323,9 @@ export default class ModelDB {
                 "config",
                 {
                     bytes: config,
-                    modelID: modelID,
+                    parentID: parentID,
                 },
-                modelID
+                parentID
             );
 
             let tokenizer = await fetch(
@@ -296,9 +337,9 @@ export default class ModelDB {
                 "tokenizer",
                 {
                     bytes: tokenizer,
-                    modelID: modelID,
+                    parentID: parentID,
                 },
-                modelID
+                parentID
             );
         } catch (e) {
             console.log(e);
