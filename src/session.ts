@@ -12,11 +12,10 @@ export class Session {
             );
         }
 
-        //TODO: inverted these indexes temporarily
-        let encoder = await model.models[1].bytes
+        let encoder = await model.models[0].bytes
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        let decoder = await model.models[0].bytes
+        let decoder = await model.models[1].bytes
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
 

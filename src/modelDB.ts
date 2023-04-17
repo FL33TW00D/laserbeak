@@ -2,10 +2,12 @@ import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
 import { v4 as uuidv4 } from "uuid";
 import { AvailableModels } from "./modelManager";
 import { Unzipped, unzipSync } from "fflate";
+import EncoderDecoder from "./encoderDecoder";
 
 export interface EncoderDecoder {
     name: string;
-    models: StoredModel[];
+    encoder: Uint8Array;
+    decoder: Uint8Array;
     tensors: Map<string, Uint8Array>;
     config: Uint8Array;
     tokenizer: Uint8Array;
@@ -15,7 +17,7 @@ export interface StoredModel {
     name: string;
     modelID: string; //Non unique, same for encoder and decoder
     bytes: Blob;
-    encoder: boolean;
+    index: number; //Encoder 0, Decoder 1, etc
 }
 
 interface StoredTensor {
@@ -36,8 +38,18 @@ interface ModelDBSchema extends DBSchema {
         indexes: { modelID: string };
     };
     availableModels: {
-        value: string;
+        value: string; //modelID
         key: AvailableModels;
+    };
+    config: {
+        value: Uint8Array;
+        key: string;
+        indexes: { modelID: string };
+    };
+    tokenizer: {
+        value: Uint8Array;
+        key: string;
+        indexes: { modelID: string };
     };
 }
 
@@ -59,6 +71,10 @@ export default class ModelDB {
                 let tensor_store = db.createObjectStore("tensors");
                 tensor_store.createIndex("modelID", "modelID");
                 db.createObjectStore("availableModels");
+                let config_store = db.createObjectStore("config");
+                config_store.createIndex("modelID", "modelID");
+                let tokenizer_store = db.createObjectStore("tokenizer");
+                tokenizer_store.createIndex("modelID", "modelID");
             },
         });
     }
@@ -104,14 +120,50 @@ export default class ModelDB {
 
         await tx.done;
 
+        models.sort((a, b) => a.index - b.index);
         return models;
     }
 
-    //Takes in a modelName, e.g "flan_t5_small"
+    async _getConfig(modelID: string): Promise<Uint8Array> {
+        console.log("Attempting to get config");
+        if (!this.db) {
+            throw new Error("ModelDB not initialized");
+        }
+
+        let config = await this.db.getAllFromIndex(
+            "config",
+            "modelID",
+            modelID.toString()
+        );
+        if (config.length !== 1) {
+            throw new Error("Expected 1 config, got " + config.length);
+        }
+
+        return config[0];
+    }
+
+    async _getTokenizer(modelID: string): Promise<Uint8Array> {
+        console.log("Attempting to get tokenizer");
+        if (!this.db) {
+            throw new Error("ModelDB not initialized");
+        }
+
+        let tokenizer = await this.db.getAllFromIndex(
+            "tokenizer",
+            "modelID",
+            modelID.toString()
+        );
+        if (tokenizer.length !== 1) {
+            throw new Error("Expected 1 tokenizer, got " + tokenizer.length);
+        }
+
+        return tokenizer[0];
+    }
+
+    //TODO: generalize
     async getModel(
         model: AvailableModels
     ): Promise<EncoderDecoder | undefined> {
-        console.log("Get Model");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
@@ -123,58 +175,59 @@ export default class ModelDB {
         }
 
         let models = await this._getModels(modelID!);
-        let tensors = await this._getTensors(modelID!);
+        if (models.length !== 2) {
+            throw new Error("Expected 2 models, got " + models.length);
+        }
 
-        //TODO: fix
-        let hf_key = model.replaceAll("_", "-");
-        let config = await fetch(
-            `https://huggingface.co/google/${hf_key}/raw/main/config.json`
-        )
-            .then((resp) => resp.arrayBuffer())
-            .then((buffer) => new Uint8Array(buffer));
-        let tokenizer = await fetch(
-            `https://huggingface.co/google/${hf_key}/raw/main/tokenizer.json`
-        )
-            .then((resp) => resp.arrayBuffer())
-            .then((buffer) => new Uint8Array(buffer));
-        return {
-            name: model,
-            models: models,
-            tensors: tensors,
-            config: config,
-            tokenizer: tokenizer,
-        };
+        let encoder = await models[0].bytes.arrayBuffer().then((buffer) => {
+            return new Uint8Array(buffer);
+        });
+        let decoder = await models[1].bytes.arrayBuffer().then((buffer) => {
+            return new Uint8Array(buffer);
+        });
+        let tensors = await this._getTensors(modelID!);
+        let config = await this._getConfig(modelID!);
+        let tokenizer = await this._getTokenizer(modelID!);
+
+        return new EncoderDecoder(
+            model,
+            encoder,
+            decoder,
+            tensors,
+            config,
+            tokenizer
+        );
     }
 
-    async insertEncoderDecoder(modelName: AvailableModels, bundle: Unzipped) {
-        let modelID = uuidv4(); //Encoder and Decoder have same ID
-        this.db!.put("availableModels", modelID, modelName);
-        for (let [key, bytes] of Object.entries(bundle)) {
-            let extension = key.split(".").pop();
-            if (extension === "onnx") {
-                let storedModel = {
-                    name: key,
-                    modelID: modelID,
-                    bytes: new Blob([bytes]),
-                    encoder: key.includes("encoder"),
-                };
+    async insertModel(
+        name: string,
+        index: number,
+        modelID: string,
+        bytes: Uint8Array
+    ) {
+        let storedModel = {
+            name: name,
+            modelID: modelID,
+            bytes: new Blob([bytes]),
+            index: index,
+        };
 
-                this.db!.put("models", storedModel, uuidv4());
-            } else {
-                console.log("Stored tensor key: ", key);
-                let tensor_name = key.split("/").pop();
-                if (!tensor_name) {
-                    throw new Error("Could not parse tensor name");
-                }
-                let storedTensor = {
-                    name: tensor_name,
-                    bytes: bytes,
-                    modelID: modelID,
-                };
+        this.db!.put("models", storedModel, uuidv4());
+    }
 
-                this.db!.put("tensors", storedTensor, uuidv4());
-            }
+    async insertTensor(key: string, modelID: string, bytes: Uint8Array) {
+        console.log("Stored tensor key: ", key);
+        let tensor_name = key.split("/").pop();
+        if (!tensor_name) {
+            throw new Error("Could not parse tensor name");
         }
+        let storedTensor = {
+            name: tensor_name,
+            bytes: bytes,
+            modelID: modelID,
+        };
+
+        this.db!.put("tensors", storedTensor, uuidv4());
     }
 
     //Fetches a resource from the remote server
@@ -185,17 +238,45 @@ export default class ModelDB {
         }
         console.log("About to fetch");
         try {
-            let zip_bytes = await fetch(`${this.remoteUrl}/${modelName}.zip`)
+            let modelID = uuidv4(); //Encoder and Decoder have same ID
+            this.db!.put("availableModels", modelID, modelName);
+
+            let model_definition = await fetch(
+                `${this.remoteUrl}/${modelName}/model_definition.json`
+            ).then((resp) => resp.json());
+
+            for (let [index, model] of model_definition.models.entries()) {
+                let bytes = await fetch(
+                    `${this.remoteUrl}/${modelName}/${model}`
+                )
+                    .then((resp) => resp.arrayBuffer())
+                    .then((buffer) => new Uint8Array(buffer));
+                this.insertModel(model, index, modelName, bytes);
+            }
+
+            for (let tensor of model_definition.tensors) {
+                let bytes = await fetch(
+                    `${this.remoteUrl}/${modelName}/${tensor}`
+                )
+                    .then((resp) => resp.arrayBuffer())
+                    .then((buffer) => new Uint8Array(buffer));
+                this.insertTensor(tensor, modelName, bytes);
+            }
+
+            let config = await fetch(
+                `${this.remoteUrl}/${modelName}/config.json`
+            )
                 .then((resp) => resp.arrayBuffer())
                 .then((buffer) => new Uint8Array(buffer));
-            //TODO: work out why unzip async doesn't work
-            let bytes = unzipSync(zip_bytes, {
-                filter(file) {
-                    //Filter directory
-                    return file.size > 0;
-                },
-            });
-            this.insertEncoderDecoder(modelName, bytes);
+
+            this.db!.put("config", config, modelName);
+
+            let tokenizer = await fetch(
+                `${this.remoteUrl}/${modelName}/tokenizer.json`
+            )
+                .then((resp) => resp.arrayBuffer())
+                .then((buffer) => new Uint8Array(buffer));
+            this.db!.put("tokenizer", tokenizer, modelName);
         } catch (e) {
             console.log(e);
         }
