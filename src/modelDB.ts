@@ -23,12 +23,12 @@ export interface EncoderDecoder {
 interface StoredModel {
     name: string;
     parentID: string; //Non unique, same for encoder and decoder
-    bytes: Blob;
+    bytes: Uint8Array;
     index: number; //Encoder 0, Decoder 1, etc
     tensorIDs: string[]; //IDs of the tensors associated with this model
 }
 
-interface ModelWithKey {
+export interface ModelWithKey {
     id: string; //id of the model sub-component
     model: StoredModel;
 }
@@ -182,10 +182,10 @@ export default class ModelDB {
         return tokenizer[0];
     }
 
-    //TODO: generalize
-    async getModel(
+    /*
+    async getModels(
         model: AvailableModels
-    ): Promise<EncoderDecoder | undefined> {
+    ): Promise<Model[] | undefined> {
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
@@ -196,44 +196,51 @@ export default class ModelDB {
             parentID = await this.db.get("availableModels", model);
         }
 
-        let models = await this._getModels(parentID!);
-        if (models.length !== 2) {
-            throw new Error("Expected 2 models, got " + models.length);
+        let storedModels = await this._getModels(parentID!);
+        if (storedModels.length !== 2) {
+            throw new Error("Expected 2 models, got " + storedModels.length);
         }
 
-        let encoder = models[0];
-        let decoder = models[1];
+        let models: Model[] = [];
+        for (let stored of storedModels) {
+            let tensors = await this._getTensors(stored.model.tensorIDs);
+            let modelDef = await stored.model.bytes
+                .arrayBuffer()
+                .then((buffer) => new Uint8Array(buffer));
+            let config = await this._getConfig(parentID!);
+            let tokenizer = await this._getTokenizer(parentID!);
+            models.push({
+                name: stored.model.name,
+                definition: modelDef,
+                tensors: tensors,
+                config: config.bytes,
+                tokenizer: tokenizer.bytes,
+            });
+        }
 
-        let encoderTensors = await this._getTensors(encoder.model.tensorIDs);
-        console.log("Encoder tensors length: ", encoderTensors.size);
-        let decoderTensors = await this._getTensors(decoder.model.tensorIDs);
-        console.log("Decoder tensors length: ", decoderTensors.size);
+        return models;
+    }
+    */
 
-        let encoderDefinition = await encoder.model.bytes
-            .arrayBuffer()
-            .then((buffer) => new Uint8Array(buffer));
-        let decoderDefinition = await decoder.model.bytes
-            .arrayBuffer()
-            .then((buffer) => new Uint8Array(buffer));
+    async getModels(
+        model: AvailableModels
+    ): Promise<ModelWithKey[] | undefined> {
+        if (!this.db) {
+            throw new Error("ModelDB not initialized");
+        }
+        let parentID = await this.db.get("availableModels", model);
+        console.log("Found existing model ID: ", parentID);
+        if (!parentID) {
+            await this._fetchBundle(model);
+            parentID = await this.db.get("availableModels", model);
+        }
 
-        let config = await this._getConfig(parentID!);
-        let tokenizer = await this._getTokenizer(parentID!);
+        let storedModels = await this._getModels(parentID!);
+        if (storedModels.length !== 2) {
+            throw new Error("Expected 2 models, got " + storedModels.length);
+        }
 
-        return {
-            name: model,
-            encoder: {
-                name: encoder.model.name,
-                definition: encoderDefinition,
-                tensors: encoderTensors,
-            },
-            decoder: {
-                name: decoder.model.name,
-                definition: decoderDefinition,
-                tensors: decoderTensors,
-            },
-            config: config.bytes,
-            tokenizer: tokenizer.bytes,
-        };
+        return storedModels;
     }
 
     async insertModel(
@@ -247,7 +254,7 @@ export default class ModelDB {
             name: definition,
             tensorIDs: tensorIDs,
             parentID: parentID,
-            bytes: new Blob([bytes]),
+            bytes: bytes,
             index: index,
         };
 

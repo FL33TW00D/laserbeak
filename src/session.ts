@@ -1,36 +1,49 @@
 import * as Comlink from "comlink";
 import * as rumble from "@rumbl/rumble-wasm";
-import { EncoderDecoder } from "./modelDB";
+import ModelDB, { EncoderDecoder, Model, ModelWithKey } from "./modelDB";
 
 export class Session {
     rumbleSession: rumble.Session | undefined;
 
-    _initEncoderDecoder = async (model: EncoderDecoder) => {
+    initEncoderDecoder = async (models: ModelWithKey[], modelDB: ModelDB) => {
         await rumble.default();
 
         let session_builder = new rumble.SessionBuilder();
 
+        let encoder = models[0];
+        let encoderTensors = await modelDB._getTensors(encoder.model.tensorIDs);
+        let encoderDefinition = encoder.model.bytes;
+
         let encoderModel = new rumble.ModelDefinition(
-            model.encoder.definition,
-            model.encoder.tensors
+            encoderDefinition,
+            encoderTensors
         );
+        session_builder = await session_builder.setEncoder(encoderModel);
+
+        let decoder = models[1];
+        let decoderTensors = await modelDB._getTensors(decoder.model.tensorIDs);
+        let decoderDefinition = decoder.model.bytes;
+
         let decoderModel = new rumble.ModelDefinition(
-            model.decoder.definition,
-            model.decoder.tensors
+            decoderDefinition,
+            decoderTensors
         );
 
-        session_builder = await session_builder.setEncoder(encoderModel);
         session_builder = await session_builder.setDecoder(decoderModel);
-        session_builder = await session_builder.setConfig(model.config);
-        session_builder = session_builder.setTokenizer(model.tokenizer);
+
+        let config = await modelDB._getConfig(decoder.model.parentID);
+        let tokenizer = await modelDB._getTokenizer(decoder.model.parentID);
+        session_builder = await session_builder.setConfig(config.bytes);
+        session_builder = session_builder.setTokenizer(tokenizer.bytes);
+
         let session = await session_builder.build();
 
         this.rumbleSession = session;
     };
 
-    //TODO: generalize this
-    init = async (model: EncoderDecoder) => {
-        await this._initEncoderDecoder(model);
+    initModel = async (model: ModelWithKey[]) => {
+        //todo
+        model;
     };
 
     run = async (
