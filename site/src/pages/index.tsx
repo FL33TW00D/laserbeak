@@ -1,15 +1,30 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import SummizeEditor from "../components/editor";
+import SummizeEditor from "../components/editor/editor";
 import { Inter } from "@next/font/google";
-import ChromeDownloadModal from "../components/chromeModal";
-import React, { useState } from "react";
+import ChromeDownloadModal from "../components/modals/modal";
+import React, { useEffect, useState } from "react";
 import { ModelManager, AvailableModels } from "laserbeak";
+import SuccessToast from "../components/toasts/successToast";
+import toast from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
 const Home: NextPage = () => {
     const [model, setModel] = useState<any | null>(null);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (loaded) {
+            toast.custom((t) => (
+                <SuccessToast
+                    message={"The model has been loaded successfully!"}
+                    toast={t}
+                />
+            ));
+        }
+    }, [loaded]);
 
     return (
         <div className={`p-0 ${inter.className}`}>
@@ -29,7 +44,8 @@ const Home: NextPage = () => {
                         let modelManager = new ModelManager();
                         await modelManager.init();
                         let loadedModel = await modelManager.loadModel(
-                            AvailableModels.FLAN_T5_BASE
+                            AvailableModels.FLAN_T5_BASE,
+                            () => setLoaded(true)
                         );
                         setModel(loadedModel);
                     })();
@@ -37,6 +53,7 @@ const Home: NextPage = () => {
             />
 
             <main className="min-h-screen flex flex-1 flex-col">
+                <Toaster />
                 <div className="flex-1">
                     <div className="flex flex-col text-center bg-dark py-2">
                         <h1 className="font-black">summize</h1>

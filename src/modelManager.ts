@@ -19,12 +19,17 @@ export class ModelManager {
         await this.modelDB.init();
     }
 
-    loadModel = async (model: AvailableModels) => {
-        const model_data = await this.modelDB.getModel(model);
+    loadModel = async (model: AvailableModels, onLoaded: () => void) => {
+        const model_data = await this.modelDB.getModels(model);
         if (!model_data) {
             console.log(model_data);
             throw new Error("Model not found");
         }
-        return await createSession(false, model_data);
+        if (model_data.length === 2) {
+            let session = await createSession(true, model_data, this.modelDB);
+            onLoaded();
+            return session;
+        }
+        console.log("Only encoder-decoder models are supported");
     }
 }
