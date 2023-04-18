@@ -118,7 +118,6 @@ export default class ModelDB {
             totalBytes += tensor.bytes.length;
         }
 
-        console.log("Found tensors: ", tensorMap);
         console.log("Total tensor bytes: ", totalBytes);
 
         await tx.done;

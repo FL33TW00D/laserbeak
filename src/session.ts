@@ -30,9 +30,8 @@ export class Session {
         );
 
         session_builder = await session_builder.setDecoder(decoderModel);
-
-        let config = await modelDB._getConfig(decoder.model.parentID);
-        let tokenizer = await modelDB._getTokenizer(decoder.model.parentID);
+        let config = await modelDB._getConfig(encoder.model.parentID);
+        let tokenizer = await modelDB._getTokenizer(encoder.model.parentID);
         session_builder = await session_builder.setConfig(config.bytes);
         session_builder = session_builder.setTokenizer(tokenizer.bytes);
 
