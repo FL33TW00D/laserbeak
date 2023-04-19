@@ -1,12 +1,11 @@
 {
   "include": ["src/**/*.ts", "test/**/*.ts"],
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ES2020",
     "strict": true,
-    "module": "ES2022",
+    "module": "ES2020",
     "lib": ["dom", "esnext"],
     "moduleResolution": "node",
-    "watch": false,
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": false,
@@ -16,5 +15,5 @@
     "outDir": "./dist",
     "sourceMap": true
   },
-  "exclude": ["site"]
+  "exclude": ["site", "node_modules"]
 }

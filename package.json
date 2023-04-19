@@ -1,6 +1,6 @@
 {
-  "name": "laserbeak",
-  "version": "0.1.0",
+  "name": "@rumbl/laserbeak",
+  "version": "0.3.0",
   "author": "Christopher Fleetwood",
   "description": "ML on the GPU comes to the browser",
   "repository": "FL33TW00D/laserbeak",
@@ -25,12 +25,6 @@
     "lint": "eslint ./src"
   },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity": "^3.292.0",
-    "@aws-sdk/client-s3": "^3.292.0",
-    "@aws-sdk/credential-provider-cognito-identity": "^3.292.0",
-    "@aws-sdk/s3-request-presigner": "^3.292.0",
-    "@aws-sdk/util-create-request": "^3.292.0",
-    "@aws-sdk/util-format-url": "^3.292.0",
     "@rumbl/rumble-wasm": "0.4.0",
     "comlink": "^4.4.1",
     "fflate": "^0.7.4",
