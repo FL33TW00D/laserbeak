@@ -1,6 +1,6 @@
 import * as rumble from "@rumbl/rumble-wasm";
-import ModelDB from "./db/modelDB.js";
-import { DBModel } from "./db/types.js";
+import ModelDB from "./db/modelDB";
+import { DBModel } from "./db/types";
 
 export class Model {
     name: string;

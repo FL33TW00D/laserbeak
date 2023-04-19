@@ -1,13 +1,13 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
 import { v4 as uuidv4 } from "uuid";
-import { AvailableModels } from "../modelManager.js";
+import { AvailableModels } from "../modelManager";
 import {
     DBModel,
     DBTensor,
     DBConfig,
     DBTokenizer,
     ModelWithKey,
-} from "./types.js";
+} from "./types";
 
 interface ModelDBSchema extends DBSchema {
     models: {
@@ -234,7 +234,7 @@ export default class ModelDB {
             }
 
             let config = await fetch(
-                `${this.remoteUrl}/${modelName}/config.json`
+                `${this.remoteUrl}/${modelName}/configon`
             )
                 .then((resp) => resp.arrayBuffer())
                 .then((buffer) => new Uint8Array(buffer));
@@ -249,7 +249,7 @@ export default class ModelDB {
             );
 
             let tokenizer = await fetch(
-                `${this.remoteUrl}/${modelName}/tokenizer.json`
+                `${this.remoteUrl}/${modelName}/tokenizeron`
             )
                 .then((resp) => resp.arrayBuffer())
                 .then((buffer) => new Uint8Array(buffer));

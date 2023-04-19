@@ -10,13 +10,12 @@
   },
   "dependencies": {
     "@emotion/css": "^11.10.6",
-    "@next/font": "13.0.5",
-    "@rumbl/laserbeak": "file:..",
-    "next": "13.0.5",
+    "@next/font": "13.1.0",
+    "@rumbl/laserbeak": "0.4.6",
+    "next": "13.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.0",
-    "react-quill": "^2.0.0",
     "react-responsive-modal": "^6.4.1",
     "slate-history": "^0.93.0",
     "slate-react": "^0.93.0"
@@ -24,7 +23,6 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.9",
     "@types/node": "18.11.9",
-    "@types/pako": "^2.0.0",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.9",
     "autoprefixer": "^10.4.13",

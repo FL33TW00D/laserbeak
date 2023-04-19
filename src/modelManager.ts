@@ -1,6 +1,6 @@
-import ModelDB from "./db/modelDB.js";
-import { createSession } from "./createSession.js";
-import { Model } from "./models.js";
+import ModelDB from "./db/modelDB";
+import { createSession } from "./createSession";
+import { Model } from "./models";
 
 export enum AvailableModels {
     FLAN_T5_SMALL = "flan_t5_small",
