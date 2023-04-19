@@ -9,7 +9,13 @@ export class Model {
     config?: Uint8Array;
     tokenizer?: Uint8Array;
 
-    constructor(name: string, definition: Uint8Array, tensors: Map<string, Uint8Array>, config?: Uint8Array, tokenizer?: Uint8Array) {
+    constructor(
+        name: string,
+        definition: Uint8Array,
+        tensors: Map<string, Uint8Array>,
+        config?: Uint8Array,
+        tokenizer?: Uint8Array
+    ) {
         this.name = name;
         this.definition = definition;
         this.tensors = tensors;
@@ -27,7 +33,7 @@ export class Model {
         let tokenizer = await db._getTokenizer(dbModel.parentID);
 
         return new Model(
-            dbModel.name, 
+            dbModel.name,
             dbModel.bytes,
             tensors,
             config.bytes,
