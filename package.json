@@ -31,7 +31,7 @@
     "@aws-sdk/s3-request-presigner": "^3.292.0",
     "@aws-sdk/util-create-request": "^3.292.0",
     "@aws-sdk/util-format-url": "^3.292.0",
-    "@rumbl/rumble-wasm": "file:../rumble/target/pkg",
+    "@rumbl/rumble-wasm": "0.4.0",
     "comlink": "^4.4.1",
     "fflate": "^0.7.4",
     "idb": "^7.1.1",
