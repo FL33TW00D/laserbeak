@@ -1,13 +1,13 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
 import { v4 as uuidv4 } from "uuid";
-import { AvailableModels } from "../modelManager";
+import { AvailableModels } from "../modelManager.js";
 import {
     DBModel,
     DBTensor,
     DBConfig,
     DBTokenizer,
     ModelWithKey,
-} from "./types";
+} from "./types.js";
 
 interface ModelDBSchema extends DBSchema {
     models: {

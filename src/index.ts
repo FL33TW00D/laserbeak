@@ -1,1 +1,1 @@
-export { ModelManager, AvailableModels } from './modelManager';
+export { ModelManager, AvailableModels } from './modelManager.js';

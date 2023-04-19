@@ -1,7 +1,7 @@
 import * as Comlink from "comlink";
 import { Remote, wrap } from "comlink";
-import { Model } from "./models";
-import { Session } from "./session";
+import { Model } from "./models.js";
+import { Session } from "./session.js";
 
 export const createSession = async (
     spawnWorker: boolean,

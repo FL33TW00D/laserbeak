@@ -1,6 +1,6 @@
 import * as Comlink from "comlink";
 import * as rumble from "@rumbl/rumble-wasm";
-import { Model } from "./models";
+import { Model } from "./models.js";
 
 export class Session {
     rumbleSession: rumble.Session | undefined;

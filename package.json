@@ -1,9 +1,10 @@
 {
   "name": "@rumbl/laserbeak",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "author": "Christopher Fleetwood",
   "description": "ML on the GPU comes to the browser",
   "repository": "FL33TW00D/laserbeak",
+  "type": "module",
   "keywords": [
     "rust",
     "WebGPU",
