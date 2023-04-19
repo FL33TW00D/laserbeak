@@ -1,5 +1,6 @@
-import ModelDB from "./modelDB";
+import ModelDB from "./db/modelDB";
 import { createSession } from "./createSession";
+import { Model } from "./models";
 
 export enum AvailableModels {
     FLAN_T5_SMALL = "flan_t5_small",
@@ -7,6 +8,7 @@ export enum AvailableModels {
     FLAN_T5_LARGE = "flan_t5_large",
 }
 
+//ModelManager abstracts over the DB
 export class ModelManager {
     modelDB: ModelDB;
 
@@ -17,19 +19,26 @@ export class ModelManager {
 
     init = async () => {
         await this.modelDB.init();
-    }
+    };
 
     loadModel = async (model: AvailableModels, onLoaded: () => void) => {
-        const model_data = await this.modelDB.getModels(model);
-        if (!model_data) {
-            console.log(model_data);
+        const dbModels = await this.modelDB.getModels(model);
+        if (!dbModels) {
+            console.log(dbModels);
             throw new Error("Model not found");
         }
-        if (model_data.length === 2) {
-            let session = await createSession(true, model_data, this.modelDB);
-            onLoaded();
-            return session;
+        if (dbModels.length === 2) {
+            const models = await Promise.all(
+                dbModels.map(async (m) => {
+                    const model = await Model.fromDBModel(m.model, this.modelDB);
+                    return model;
+                })
+            );
+            return await createSession(true, models).then((s) => {
+                onLoaded();
+                return s;
+            });
         }
         console.log("Only encoder-decoder models are supported");
-    }
+    };
 }

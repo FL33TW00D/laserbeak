@@ -1,48 +1,32 @@
 import * as Comlink from "comlink";
 import * as rumble from "@rumbl/rumble-wasm";
-import ModelDB, { EncoderDecoder, Model, ModelWithKey } from "./modelDB";
+import { Model } from "./models";
 
 export class Session {
     rumbleSession: rumble.Session | undefined;
 
-    initEncoderDecoder = async (models: ModelWithKey[], modelDB: ModelDB) => {
+    initEncoderDecoder = async (models: Model[]) => {
         await rumble.default();
 
         let session_builder = new rumble.SessionBuilder();
+        let encoder = models[0].intoDefinition();
+        let decoder = models[1].intoDefinition();
+        let config = models[0].config;
+        let tokenizer = models[0].tokenizer;
 
-        let encoder = models[0];
-        let encoderTensors = await modelDB._getTensors(encoder.model.tensorIDs);
-        let encoderDefinition = encoder.model.bytes;
-
-        let encoderModel = new rumble.ModelDefinition(
-            encoderDefinition,
-            encoderTensors
-        );
-        session_builder = await session_builder.setEncoder(encoderModel);
-
-        let decoder = models[1];
-        let decoderTensors = await modelDB._getTensors(decoder.model.tensorIDs);
-        let decoderDefinition = decoder.model.bytes;
-
-        let decoderModel = new rumble.ModelDefinition(
-            decoderDefinition,
-            decoderTensors
-        );
-
-        session_builder = await session_builder.setDecoder(decoderModel);
-        let config = await modelDB._getConfig(encoder.model.parentID);
-        let tokenizer = await modelDB._getTokenizer(encoder.model.parentID);
-        session_builder = await session_builder.setConfig(config.bytes);
-        session_builder = session_builder.setTokenizer(tokenizer.bytes);
-
-        let session = await session_builder.build();
-
-        this.rumbleSession = session;
+        this.rumbleSession = await session_builder
+            .setEncoder(encoder)
+            .setDecoder(decoder)
+            .setConfig(config!)
+            .setTokenizer(tokenizer!)
+            .build();
     };
 
-    initModel = async (model: ModelWithKey[]) => {
-        //todo
-        model;
+    initSession = async (models: Model[]) => {
+        if (models.length !== 2) {
+            throw Error("Only encoder-decoder models are supported");
+        }
+        this.initEncoderDecoder(models);
     };
 
     run = async (

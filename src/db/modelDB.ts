@@ -1,61 +1,22 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
 import { v4 as uuidv4 } from "uuid";
-import { AvailableModels } from "./modelManager";
-
-export interface Model {
-    name: string;
-    definition: Uint8Array;
-    tensors: Map<string, Uint8Array>;
-    config?: Uint8Array;
-    tokenizer?: Uint8Array;
-}
-
-export interface EncoderDecoder {
-    name: string;
-    encoder: Model;
-    decoder: Model;
-    config: Uint8Array;
-    tokenizer: Uint8Array;
-}
-
-///A model represents a single ONNX model
-///It may be a sub-component of a larger model
-interface StoredModel {
-    name: string;
-    parentID: string; //Non unique, same for encoder and decoder
-    bytes: Uint8Array;
-    index: number; //Encoder 0, Decoder 1, etc
-    tensorIDs: string[]; //IDs of the tensors associated with this model
-}
-
-export interface ModelWithKey {
-    id: string; //id of the model sub-component
-    model: StoredModel;
-}
-
-interface StoredTensor {
-    name: string;
-    bytes: Uint8Array;
-}
-
-interface StoredConfig {
-    bytes: Uint8Array;
-    parentID: string;
-}
-
-interface StoredTokenizer {
-    bytes: Uint8Array;
-    parentID: string;
-}
+import { AvailableModels } from "../modelManager";
+import {
+    DBModel,
+    DBTensor,
+    DBConfig,
+    DBTokenizer,
+    ModelWithKey,
+} from "./types";
 
 interface ModelDBSchema extends DBSchema {
     models: {
-        value: StoredModel;
+        value: DBModel;
         key: string;
         indexes: { parentID: string; tensorsIDs: string[] };
     };
     tensors: {
-        value: StoredTensor;
+        value: DBTensor;
         key: string;
     };
     availableModels: {
@@ -63,12 +24,12 @@ interface ModelDBSchema extends DBSchema {
         key: AvailableModels;
     };
     config: {
-        value: StoredConfig;
+        value: DBConfig;
         key: string;
         indexes: { parentID: string };
     };
     tokenizer: {
-        value: StoredTokenizer;
+        value: DBTokenizer;
         key: string;
         indexes: { parentID: string };
     };
@@ -145,7 +106,7 @@ export default class ModelDB {
         return models;
     }
 
-    async _getConfig(parentID: string): Promise<StoredConfig> {
+    async _getConfig(parentID: string): Promise<DBConfig> {
         console.log("Attempting to get config");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
@@ -163,7 +124,7 @@ export default class ModelDB {
         return config[0];
     }
 
-    async _getTokenizer(parentID: string): Promise<StoredTokenizer> {
+    async _getTokenizer(parentID: string): Promise<DBTokenizer> {
         console.log("Attempting to get tokenizer");
         if (!this.db) {
             throw new Error("ModelDB not initialized");
@@ -180,46 +141,6 @@ export default class ModelDB {
 
         return tokenizer[0];
     }
-
-    /*
-    async getModels(
-        model: AvailableModels
-    ): Promise<Model[] | undefined> {
-        if (!this.db) {
-            throw new Error("ModelDB not initialized");
-        }
-        let parentID = await this.db.get("availableModels", model);
-        console.log("Found existing model ID: ", parentID);
-        if (!parentID) {
-            await this._fetchBundle(model);
-            parentID = await this.db.get("availableModels", model);
-        }
-
-        let storedModels = await this._getModels(parentID!);
-        if (storedModels.length !== 2) {
-            throw new Error("Expected 2 models, got " + storedModels.length);
-        }
-
-        let models: Model[] = [];
-        for (let stored of storedModels) {
-            let tensors = await this._getTensors(stored.model.tensorIDs);
-            let modelDef = await stored.model.bytes
-                .arrayBuffer()
-                .then((buffer) => new Uint8Array(buffer));
-            let config = await this._getConfig(parentID!);
-            let tokenizer = await this._getTokenizer(parentID!);
-            models.push({
-                name: stored.model.name,
-                definition: modelDef,
-                tensors: tensors,
-                config: config.bytes,
-                tokenizer: tokenizer.bytes,
-            });
-        }
-
-        return models;
-    }
-    */
 
     async getModels(
         model: AvailableModels
@@ -249,16 +170,9 @@ export default class ModelDB {
         parentID: string,
         bytes: Uint8Array
     ): Promise<string> {
-        let storedModel = {
-            name: definition,
-            tensorIDs: tensorIDs,
-            parentID: parentID,
-            bytes: bytes,
-            index: index,
-        };
-
+        let dbModel = { name: definition, parentID, bytes, index, tensorIDs };
         let componentID = uuidv4();
-        this.db!.put("models", storedModel, componentID);
+        this.db!.put("models", dbModel, componentID);
         return componentID;
     }
 
