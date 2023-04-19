@@ -5,7 +5,7 @@ import { Session } from "./session";
 
 export const createSession = async (
     spawnWorker: boolean,
-    models: Model[],
+    models: Model[]
 ): Promise<Session | Comlink.Remote<Session>> => {
     // Workers don't work right now
     if (false && spawnWorker && typeof document !== "undefined") {

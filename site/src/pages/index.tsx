@@ -4,7 +4,7 @@ import SummizeEditor from "../components/editor/editor";
 import { Inter } from "@next/font/google";
 import ChromeDownloadModal from "../components/modals/modal";
 import React, { useEffect, useState } from "react";
-import { ModelManager, AvailableModels } from "laserbeak";
+import { ModelManager, AvailableModels } from "@rumbl/laserbeak";
 import SuccessToast from "../components/toasts/successToast";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";

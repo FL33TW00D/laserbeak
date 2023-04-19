@@ -1,20 +1,20 @@
 {
-  "include": ["src/**/*.ts", "test/**/*.ts"],
-  "compilerOptions": {
-    "target": "esnext",
-    "strict": true,
-    "module": "ES2022",
-    "lib": ["dom", "esnext"],
-    "moduleResolution": "node",
-    "watch": false,
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": false,
-    "checkJs": false,
-    "esModuleInterop": true,
-    "noImplicitAny": false,
-    "outDir": "./dist",
-    "sourceMap": true
-  },
-  "exclude": ["site"]
+    "compilerOptions": {
+        "target": "es2015",
+        "strict": true,
+        "module": "esnext",
+        "lib": ["dom", "esnext"],
+        "moduleResolution": "node",
+        "declaration": true,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": false,
+        "checkJs": false,
+        "esModuleInterop": true,
+        "noImplicitAny": false,
+        "outDir": "./dist",
+        "sourceMap": true,
+        "strictPropertyInitialization": true
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "test"]
 }

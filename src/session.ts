@@ -26,7 +26,7 @@ export class Session {
         if (models.length !== 2) {
             throw Error("Only encoder-decoder models are supported");
         }
-        this.initEncoderDecoder(models);
+        await this.initEncoderDecoder(models);
     };
 
     run = async (

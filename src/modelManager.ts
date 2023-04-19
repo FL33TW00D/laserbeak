@@ -30,14 +30,17 @@ export class ModelManager {
         if (dbModels.length === 2) {
             const models = await Promise.all(
                 dbModels.map(async (m) => {
-                    const model = await Model.fromDBModel(m.model, this.modelDB);
+                    const model = await Model.fromDBModel(
+                        m.model,
+                        this.modelDB
+                    );
                     return model;
                 })
             );
-            return await createSession(true, models).then((s) => {
-                onLoaded();
-                return s;
-            });
+
+            let session = await createSession(true, models);
+            onLoaded();
+            return session;
         }
         console.log("Only encoder-decoder models are supported");
     };

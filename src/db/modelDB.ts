@@ -8,6 +8,10 @@ import {
     DBTokenizer,
     ModelWithKey,
 } from "./types";
+import pLimit from "p-limit";
+
+//Fetch concurrency limit
+const fetchLimit = pLimit(4);
 
 interface ModelDBSchema extends DBSchema {
     models: {
@@ -18,6 +22,7 @@ interface ModelDBSchema extends DBSchema {
     tensors: {
         value: DBTensor;
         key: string;
+        indexes: { name: string };
     };
     availableModels: {
         value: string; //parentID
@@ -48,9 +53,10 @@ export default class ModelDB {
     async init() {
         this.db = await openDB<ModelDBSchema>("models", 1, {
             upgrade(db) {
-                db.createObjectStore("tensors");
                 db.createObjectStore("availableModels");
 
+                let tensor_store = db.createObjectStore("tensors");
+                tensor_store.createIndex("name", "name");
                 let model_store = db.createObjectStore("models");
                 model_store.createIndex("parentID", "parentID");
                 let config_store = db.createObjectStore("config");
@@ -59,6 +65,12 @@ export default class ModelDB {
                 tokenizer_store.createIndex("parentID", "parentID");
             },
         });
+    }
+
+    async _fetchBytes(url: string): Promise<Uint8Array> {
+        let response = await fetch(url);
+        let bytes = await response.arrayBuffer();
+        return new Uint8Array(bytes);
     }
 
     async _getTensors(tensorIDs: string[]): Promise<Map<string, Uint8Array>> {
@@ -176,13 +188,32 @@ export default class ModelDB {
         return componentID;
     }
 
-    async insertTensor(key: string, bytes: Uint8Array): Promise<string> {
-        let tensor_name = key.split("/").pop();
-        if (!tensor_name) {
-            throw new Error("Could not parse tensor name");
+    async tensorExists(key: string): Promise<string | undefined> {
+        if (!this.db) {
+            throw new Error("ModelDB not initialized");
         }
+        const tx = this.db.transaction("tensors", "readonly");
+        const index = tx.store.index("name");
+
+        const count = await index.count(key);
+        if (count > 0) {
+            console.log("Found existing tensor");
+            let cursor = await index.openCursor(key);
+            if (!cursor) {
+                throw new Error("Could not find cursor");
+            }
+            return cursor.primaryKey;
+        }
+        return undefined;
+    }
+
+    async insertTensor(key: string, bytes: Uint8Array): Promise<string> {
+        if (!this.db) {
+            throw new Error("ModelDB not initialized");
+        }
+
         let storedTensor = {
-            name: tensor_name,
+            name: key,
             bytes: bytes,
         };
 
@@ -204,40 +235,40 @@ export default class ModelDB {
             let model_definition = await fetch(
                 `${this.remoteUrl}/${modelName}/model_definition.json`
             ).then((resp) => resp.json());
-
             for (let [index, model] of model_definition.models.entries()) {
-                let tensorIDs: string[] = [];
-                for (let tensor of model.tensors) {
-                    let bytes = await fetch(
-                        `${this.remoteUrl}/${modelName}/${tensor}`
-                    )
-                        .then((resp) => resp.arrayBuffer())
-                        .then((buffer) => new Uint8Array(buffer));
-                    console.log("Storing tensor: ", tensor);
-                    let tensorID = await this.insertTensor(tensor, bytes);
-                    tensorIDs.push(tensorID);
-                }
+                let tensorPromises = model.tensors.map((tensor) => {
+                    return fetchLimit(async () => {
+                        let existingID = await this.tensorExists(tensor);
+                        if (existingID) {
+                            return existingID;
+                        }
 
-                let bytes = await fetch(
+                        let tensorBytes = await this._fetchBytes(
+                            `${this.remoteUrl}/${modelName}/${tensor}`
+                        );
+
+                        return await this.insertTensor(tensor, tensorBytes);
+                    });
+                });
+
+                let tensorIDs = await Promise.all(tensorPromises);
+
+                let definitionBytes = await this._fetchBytes(
                     `${this.remoteUrl}/${modelName}/${model.definition}`
-                )
-                    .then((resp) => resp.arrayBuffer())
-                    .then((buffer) => new Uint8Array(buffer));
-                console.log("Storing model: ", model);
-                let modelID = await this.insertModel(
+                );
+
+                await this.insertModel(
                     model.definition,
                     tensorIDs,
                     index,
                     parentID,
-                    bytes
+                    definitionBytes
                 );
             }
 
-            let config = await fetch(
+            let config = await this._fetchBytes(
                 `${this.remoteUrl}/${modelName}/config.json`
-            )
-                .then((resp) => resp.arrayBuffer())
-                .then((buffer) => new Uint8Array(buffer));
+            );
 
             this.db!.put(
                 "config",
@@ -248,11 +279,10 @@ export default class ModelDB {
                 parentID
             );
 
-            let tokenizer = await fetch(
+            let tokenizer = await this._fetchBytes(
                 `${this.remoteUrl}/${modelName}/tokenizer.json`
-            )
-                .then((resp) => resp.arrayBuffer())
-                .then((buffer) => new Uint8Array(buffer));
+            );
+
             this.db!.put(
                 "tokenizer",
                 {
