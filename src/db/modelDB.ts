@@ -8,6 +8,10 @@ import {
     DBTokenizer,
     ModelWithKey,
 } from "./types";
+import pLimit from "p-limit";
+
+//Fetch concurrency limit
+const fetchLimit = pLimit(4);
 
 interface ModelDBSchema extends DBSchema {
     models: {
@@ -203,11 +207,11 @@ export default class ModelDB {
         return undefined;
     }
 
-    async insertTensor(key: string, bytes: Uint8Array): Promise<string> { 
+    async insertTensor(key: string, bytes: Uint8Array): Promise<string> {
         if (!this.db) {
             throw new Error("ModelDB not initialized");
         }
-        
+
         let storedTensor = {
             name: key,
             bytes: bytes,
@@ -231,23 +235,23 @@ export default class ModelDB {
             let model_definition = await fetch(
                 `${this.remoteUrl}/${modelName}/model_definition.json`
             ).then((resp) => resp.json());
-
             for (let [index, model] of model_definition.models.entries()) {
-                let tensorIDs: string[] = [];
-                for (let tensor of model.tensors) {
-                    let existingID = await this.tensorExists(tensor);
-                    if (existingID) {
-                        tensorIDs.push(existingID);
-                        continue;
-                    }
+                let tensorPromises = model.tensors.map((tensor) => {
+                    return fetchLimit(async () => {
+                        let existingID = await this.tensorExists(tensor);
+                        if (existingID) {
+                            return existingID;
+                        }
 
-                    let tensorBytes = await this._fetchBytes(
-                        `${this.remoteUrl}/${modelName}/${tensor}`
-                    );
+                        let tensorBytes = await this._fetchBytes(
+                            `${this.remoteUrl}/${modelName}/${tensor}`
+                        );
 
-                    let tensorID = await this.insertTensor(tensor, tensorBytes);
-                    tensorIDs.push(tensorID);
-                }
+                        return await this.insertTensor(tensor, tensorBytes);
+                    });
+                });
+
+                let tensorIDs = await Promise.all(tensorPromises);
 
                 let definitionBytes = await this._fetchBytes(
                     `${this.remoteUrl}/${modelName}/${model.definition}`
