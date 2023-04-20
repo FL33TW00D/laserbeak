@@ -40,8 +40,23 @@ interface ModelDBSchema extends DBSchema {
     };
 }
 
-/// This class provides an abstraction over IndexedDB to store models and their
-/// associated metadata.
+/**
+ * A class that represents a database of models and related data.
+ *
+ * @remarks
+ * The `ModelDB` class uses the IndexedDB API to store and retrieve data. The database schema is defined by the `ModelDBSchema` interface.
+ *
+ * To use the `ModelDB` class, first create an instance by calling the constructor. Then call the `init` method to open the database.
+ *
+ * Example usage:
+ *
+ * ```typescript
+ * const modelDB = new ModelDB();
+ * await modelDB.init();
+ * const model = await modelDB.getModels(AvailableModels.XYZ);
+ * console.log(model);
+ * ```
+ */
 export default class ModelDB {
     private readonly remoteUrl = "https://rmbl.us";
     private db: IDBPDatabase<ModelDBSchema> | null;

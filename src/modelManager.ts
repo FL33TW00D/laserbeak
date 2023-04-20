@@ -8,7 +8,22 @@ export enum AvailableModels {
     FLAN_T5_LARGE = "flan_t5_large",
 }
 
-//ModelManager abstracts over the DB
+/**
+ * A class that manages loading and running models.
+ *
+ * @remarks
+ * The `ModelManager` class provides a high-level API for loading and running models. It uses a `ModelDB` instance to store and retrieve model data.
+ *
+ * To use the `ModelManager` class, first create an instance by calling the constructor. Then call the `init` method to initialize the underlying `ModelDB` instance. Once the `ModelDB` is initialized, you can call the `loadModel` method to load a model and start a new session.
+ *
+ * Example usage:
+ *
+ * ```typescript
+ * const modelManager = new ModelManager();
+ * await modelManager.init();
+ * await modelManager.loadModel(AvailableModels.FLAN_T5_BASE, () => console.log("Model loaded"));
+ * ```
+ */
 export class ModelManager {
     modelDB: ModelDB;
 
@@ -42,6 +57,6 @@ export class ModelManager {
             onLoaded();
             return session;
         }
-        console.log("Only encoder-decoder models are supported");
+        console.log("Only encoder-decoder models are supported currently.");
     };
 }

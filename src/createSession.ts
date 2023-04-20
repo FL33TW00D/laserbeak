@@ -3,6 +3,14 @@ import { Remote, wrap } from "comlink";
 import { Model } from "./models";
 import { Session } from "./session";
 
+/**
+ * Creates a new session with the specified models.
+ *
+ * @param spawnWorker - Determines whether a Web Worker should be used for the session.
+ * @param models - An array of models to be used in the session.
+ * @returns A Promise that resolves with a Session instance, or a Remote<Session> instance if a Web Worker was used.
+ *
+ */
 export const createSession = async (
     spawnWorker: boolean,
     models: Model[]
