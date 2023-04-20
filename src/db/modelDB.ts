@@ -61,12 +61,12 @@ export default class ModelDB {
     private readonly remoteUrl = "https://rmbl.us";
     private db: IDBPDatabase<ModelDBSchema> | null;
 
-    constructor() {
-        this.db = null;
+    private constructor(db: IDBPDatabase<ModelDBSchema>) {
+        this.db = db;
     }
 
-    async init() {
-        this.db = await openDB<ModelDBSchema>("models", 1, {
+    public static async create(): Promise<ModelDB> {
+        const db = await openDB<ModelDBSchema>("models", 1, {
             upgrade(db) {
                 db.createObjectStore("availableModels");
 
@@ -80,6 +80,8 @@ export default class ModelDB {
                 tokenizer_store.createIndex("parentID", "parentID");
             },
         });
+
+        return new ModelDB(db);
     }
 
     async _fetchBytes(url: string): Promise<Uint8Array> {

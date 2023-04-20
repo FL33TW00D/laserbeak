@@ -41,8 +41,7 @@ const Home: NextPage = () => {
             <ChromeDownloadModal
                 onAccept={() => {
                     (async () => {
-                        let modelManager = new ModelManager();
-                        await modelManager.init();
+                        let modelManager = await ModelManager.create();
                         let loadedModel = await modelManager.loadModel(
                             AvailableModels.FLAN_T5_BASE,
                             () => setLoaded(true)

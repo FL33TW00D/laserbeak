@@ -5,14 +5,20 @@ import { Model } from "./models";
 export class Session {
     rumbleSession: rumble.Session | undefined;
 
-    initEncoderDecoder = async (models: Model[]) => {
+    private async initEncoderDecoder(models: Model[]): Promise<void> {
         await rumble.default();
 
-        let session_builder = new rumble.SessionBuilder();
-        let encoder = models[0].intoDefinition();
-        let decoder = models[1].intoDefinition();
-        let config = models[0].config;
-        let tokenizer = models[0].tokenizer;
+        if (models.length !== 2) {
+            throw Error(
+                "Only encoder-decoder models with 2 models are supported"
+            );
+        }
+
+        const session_builder = new rumble.SessionBuilder();
+        const encoder = models[0].intoDefinition();
+        const decoder = models[1].intoDefinition();
+        const config = models[0].config;
+        const tokenizer = models[0].tokenizer;
 
         this.rumbleSession = await session_builder
             .setEncoder(encoder)
@@ -20,27 +26,27 @@ export class Session {
             .setConfig(config!)
             .setTokenizer(tokenizer!)
             .build();
-    };
+    }
 
-    initSession = async (models: Model[]) => {
-        if (models.length !== 2) {
-            throw Error("Only encoder-decoder models are supported");
+    public async initSession(models: Model[]): Promise<void> {
+        if (this.rumbleSession) {
+            throw new Error("This session is already initialized");
         }
         await this.initEncoderDecoder(models);
-    };
+    }
 
-    run = async (
+    public async run(
         input: string,
         callback: (decoded: string) => void
-    ): Promise<void> => {
+    ): Promise<void> {
         if (!this.rumbleSession) {
-            throw Error(
-                "the session is not initialized. Call `init()` method first."
+            throw new Error(
+                "The session is not initialized. Call `initSession()` method first."
             );
         }
 
         return await this.rumbleSession.stream(input, callback);
-    };
+    }
 }
 
 if (typeof self !== "undefined") {
