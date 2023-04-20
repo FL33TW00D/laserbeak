@@ -1,31 +1,63 @@
+
 <div align="center">
 <img width="600px" height="200px" src="https://github.com/FL33TW00D/laserbeak/raw/master/.github/Laserbeak.png">
 </div>
 <h1 align="center">Transformers in the Browser</h1>
 
-Laserbeak allows you to run transformers in the browser on WebGPU. It caches and
-stores models in IndexedDB. It's fast, check out the demo here.
+Laserbeak enables developers to run transformer models in the browser/Electron using WebGPU.
+
+It is designed to efficiently manage models by caching them in IndexedDB and sharing weights between encoder-decoder models for optimal performance. To see what it can do, check out our [example site](summize.fleetwood.dev).
+
+## 🌟 Features
+
+- Run transformer models in the browser using WebGPU
+- Built on top of a custom Rust runtime for performance
+- Efficient model management with caching and weight sharing
+- Easy-to-use API for loading and running models
 
 ## ⚡️ Quick start
+
+Install Laserbeak using npm:
 
 ```bash
 npm i laserbeak
 ```
 
-## Usage
+## 📚 Usage
+
+Here's a simple example of how to load and run a model using Laserbeak:
 
 ```typescript
+import { ModelManager, AvailableModels } from "@rumbl/laserbeak";
 
+// Create a ModelManager instance
+let modelManager = await ModelManager.create();
+
+// Load a model with a callback for when it's loaded
+let model = await modelManager.loadModel(
+    AvailableModels.FLAN_T5_BASE,
+    () => console.log("Model loaded!")
+);
+
+// Run the model with a prompt and handle the output
+await model.run(prompt, (output: string) => {
+  // Process the model output
+  console.log(output);
+});
 ```
 
-## How it works
+## 🚀 Roadmap
 
-Laserbeak is the frontend for Rumble, a Rust + WebGPU ML Runtime.
+Laserbeak is still a _pre_pre_alpha_ project, here's our roadmap:
 
-## Roadmap
+- [ ] F16 support for more efficient computation
+- [ ] Shader optimizations for better performance
+- [ ] Expanded model support (Whisper, UNet)
+- [ ] INT8, INT4 support for reduced memory usage
+- [ ] Unannounced features 🤫
 
-[ ] - F16 support
-[ ] - Memory usage reduction
-[ ] - Shader optimizations
-[ ] - Model support (Whisper, UNet)
-[ ] - INT8, INT4 support
+Stay tuned for exciting updates!
+
+## 💪 Contributing
+
+We welcome contributions to Laserbeak!
