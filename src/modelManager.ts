@@ -1,6 +1,5 @@
-import ModelDB from "./db/modelDB";
 import { createSession } from "./createSession";
-import { Model } from "./models";
+import * as Comlink from "comlink";
 
 export enum AvailableModels {
     FLAN_T5_SMALL = "flan_t5_small",
@@ -9,22 +8,11 @@ export enum AvailableModels {
 }
 
 export class ModelManager {
-    modelDB: ModelDB;
-
-    private constructor(modeldb: ModelDB) {
-        this.modelDB = modeldb;
-    }
-
-    static async create() {
-        const db = await ModelDB.create();
-        return new ModelManager(db);
-    }
-
-    // Use proper method declaration
-    async loadModel(model: AvailableModels, onLoaded: () => void) {
+    public async loadModel(model: AvailableModels, onLoaded: () => void) {
         console.log("Loading model: ", model);
+        const callback = Comlink.proxy(onLoaded);
         let session = await createSession(true, model);
-        onLoaded();
+        callback();
         console.log("Model loaded: ", session);
         return session;
     }

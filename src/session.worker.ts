@@ -76,5 +76,6 @@ export class Session {
 }
 
 if(typeof self !== 'undefined') {
-    Comlink.expose(new Session());
+    let session = new Session();
+    Comlink.expose(session);
 }
