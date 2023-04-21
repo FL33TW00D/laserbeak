@@ -25,6 +25,7 @@ export class ModelManager {
         console.log("Loading model: ", model);
         let session = await createSession(true, model);
         onLoaded();
+        console.log("Model loaded: ", session);
         return session;
     }
 }

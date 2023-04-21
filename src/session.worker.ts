@@ -7,6 +7,29 @@ import { AvailableModels } from "./modelManager";
 export class Session {
     rumbleSession: rumble.Session | undefined;
 
+    private async loadModel(model: AvailableModels): Promise<Model[]> {
+        let db = await ModelDB.create();
+        const dbModels = await db.getModels(model);
+        if (!dbModels) {
+            console.log(dbModels);
+            throw new Error("Model not found");
+        }
+        if (dbModels.length === 2) {
+            const models = await Promise.all(
+                dbModels.map(async (m) => {
+                    const model = await Model.fromDBModel(
+                        m.model,
+                        db,
+                    );
+                    return model;
+                })
+            );
+
+            return models;
+        }
+        throw new Error("Only encoder-decoder models are supported currently.");
+    }
+
     private async initEncoderDecoder(models: Model[]): Promise<void> {
         await rumble.default();
 
@@ -30,10 +53,11 @@ export class Session {
             .build();
     }
 
-    public async initSession(models: Model[]): Promise<void> {
+    public async initSession(model: AvailableModels): Promise<void> {
         if (this.rumbleSession) {
             throw new Error("This session is already initialized");
         }
+        let models = await this.loadModel(model);
         await this.initEncoderDecoder(models);
     }
 
@@ -49,4 +73,8 @@ export class Session {
 
         return await this.rumbleSession.stream(input, callback);
     }
+}
+
+if(typeof self !== 'undefined') {
+    Comlink.expose(new Session());
 }
