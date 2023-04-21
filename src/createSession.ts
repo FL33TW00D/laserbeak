@@ -1,5 +1,4 @@
 import * as Comlink from "comlink";
-import { Remote, wrap } from "comlink";
 import { AvailableModels } from "./modelManager";
 import { Session } from "./session.worker";
 
@@ -16,14 +15,11 @@ export const createSession = async (
     model: AvailableModels
 ): Promise<Session | Comlink.Remote<Session>> => {
     if (spawnWorker && typeof document !== "undefined") {
-        const worker = new Worker(new URL("./session.worker.js", import.meta.url), {
+        const MyWorker  = Comlink.wrap<typeof Session>(new Worker(new URL("./session.worker.js", import.meta.url), {
             type: "module",
-        });
-        console.log("Worker created");
-        const session = wrap<Session>(worker);
-        console.log("Session created");
+        }));
+        const session = await new MyWorker();
         await session.initSession(model);
-        console.log("Session initialized");
         return session;
     } else {
         throw new Error("Not implemented");

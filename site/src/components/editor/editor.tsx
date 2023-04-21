@@ -28,6 +28,7 @@ import {
 import { css } from "@emotion/css";
 import { withHistory } from "slate-history";
 import { BulletedListElement } from "../../custom-types";
+import * as Comlink from "comlink";
 
 import { Button, Icon, Menu, Portal } from "./components";
 
@@ -153,7 +154,8 @@ async function runSample(
         let start_location = selection.focus;
         const start = performance.now();
         let prevOutput = "";
-        await model.run(inputText, (output: string) => {
+        console.log("ABOUT TO RUN MODEL: ", model);
+        await model.run(inputText, Comlink.proxy((output: string) => {
             Transforms.insertText(editor, output.substring(prevOutput.length), {
                 at: {
                     path: start_location.path,
@@ -161,7 +163,7 @@ async function runSample(
                 },
             });
             prevOutput = output;
-        });
+        }));
         const duration = performance.now() - start;
         console.log("Inference time:", duration.toFixed(2), "ms");
     } catch (e: any) {
