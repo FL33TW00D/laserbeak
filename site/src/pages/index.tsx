@@ -50,7 +50,9 @@ const Home: NextPage = () => {
                 onAccept={() => {
                     (async () => {
                         setLoading(true);
+                        console.log("Creating model manager");
                         let modelManager = await ModelManager.create();
+                        console.log("Loading model");
                         let loadedModel = await modelManager.loadModel(
                             AvailableModels.FLAN_T5_BASE,
                             () => setLoaded(true)

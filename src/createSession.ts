@@ -1,7 +1,9 @@
 import * as Comlink from "comlink";
 import { Remote, wrap } from "comlink";
+import { AvailableModels } from "./modelManager";
 import { Model } from "./models";
 import { Session } from "./session";
+import { SessionFactory } from "./sessionFactory";
 
 /**
  * Creates a new session with the specified models.
@@ -13,20 +15,21 @@ import { Session } from "./session";
  */
 export const createSession = async (
     spawnWorker: boolean,
-    models: Model[]
+    model: AvailableModels
 ): Promise<Session | Comlink.Remote<Session>> => {
-    //Spawning currently disabled
-    if (false && spawnWorker && typeof document !== "undefined") {
-        const worker = new Worker(new URL("./session.js", import.meta.url), {
+    if (spawnWorker && typeof document !== "undefined") {
+        const worker = new Worker(new URL("./sessionFactory.js", import.meta.url), {
             type: "module",
         });
-        const exposedSession = wrap<typeof Session>(worker);
-        const session: Remote<Session> = await new exposedSession();
-        await session.initSession(models);
+        console.log("Created worker");
+        const exposedFactory = wrap<typeof SessionFactory>(worker);
+        const factory: Remote<SessionFactory> = await new exposedFactory();
+        const session = await factory.createSession(model);
+        console.log("Created session with worker");
         return session;
     } else {
-        const session = new Session();
-        await session.initSession(models);
+        const factory = new SessionFactory();
+        const session = await factory.createSession(model);
         return session;
     }
 };
