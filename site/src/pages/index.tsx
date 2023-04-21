@@ -3,9 +3,8 @@ import Head from "next/head";
 import SummizeEditor from "../components/editor/editor";
 import { Inter } from "@next/font/google";
 import ChromeDownloadModal from "../components/modals/modal";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { ModelManager, AvailableModels } from "@rumbl/laserbeak";
-import SuccessToast from "../components/toasts/successToast";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
 
@@ -14,17 +13,26 @@ const inter = Inter({ subsets: ["latin"] });
 const Home: NextPage = () => {
     const [model, setModel] = useState<any | null>(null);
     const [loaded, setLoaded] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const loadingToastId = useRef<string | null>(null); // Store the loading toast id
 
     useEffect(() => {
         if (loaded) {
-            toast.custom((t) => (
-                <SuccessToast
-                    message={"The model has been loaded successfully!"}
-                    toast={t}
-                />
-            ));
+            if (loadingToastId.current) {
+                toast.dismiss(loadingToastId!.current);
+            }
+            toast.success("Model loaded!");
         }
     }, [loaded]);
+
+    useEffect(() => {
+        if (loadingToastId.current) {
+            return;
+        }
+        if (loading) {
+            loadingToastId.current = toast.loading("Loading model...");
+        }
+    }, [loading]);
 
     return (
         <div className={`p-0 ${inter.className}`}>
@@ -41,6 +49,7 @@ const Home: NextPage = () => {
             <ChromeDownloadModal
                 onAccept={() => {
                     (async () => {
+                        setLoading(true);
                         let modelManager = await ModelManager.create();
                         let loadedModel = await modelManager.loadModel(
                             AvailableModels.FLAN_T5_BASE,

@@ -15,7 +15,7 @@ export const createSession = async (
     spawnWorker: boolean,
     models: Model[]
 ): Promise<Session | Comlink.Remote<Session>> => {
-    // Workers don't work right now
+    //Spawning currently disabled
     if (false && spawnWorker && typeof document !== "undefined") {
         const worker = new Worker(new URL("./session.js", import.meta.url), {
             type: "module",
