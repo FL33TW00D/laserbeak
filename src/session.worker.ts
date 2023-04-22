@@ -1,8 +1,7 @@
 import * as Comlink from "comlink";
 import * as rumble from "@rumbl/rumble-wasm";
-import { Model } from "./models";
+import { AvailableModels, Model } from "./models";
 import ModelDB from "./db/modelDB";
-import { AvailableModels } from "./modelManager";
 
 export class Session {
     rumbleSession: rumble.Session | undefined;

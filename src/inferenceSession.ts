@@ -1,8 +1,10 @@
 import { Session } from "./session.worker";
 import * as Comlink from "comlink";
-import { AvailableModels } from "./modelManager";
+import { AvailableModels } from "./models";
 
-export class SessionWrapper {
+/// Abstracts over a session running in a web worker
+/// or in the main thread.
+export class InferenceSession {
     private session: Comlink.Remote<Session> | Session;
 
     constructor(session: Comlink.Remote<Session> | Session) {

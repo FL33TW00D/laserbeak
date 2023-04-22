@@ -4,14 +4,14 @@ import SummizeEditor from "../components/editor/editor";
 import { Inter } from "@next/font/google";
 import ChromeDownloadModal from "../components/modals/modal";
 import React, { useEffect, useState, useRef } from "react";
-import { ModelManager, AvailableModels, SessionWrapper } from "@rumbl/laserbeak";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
+import { SessionManager, AvailableModels, InferenceSession } from "@rumbl/laserbeak";
 
 const inter = Inter({ subsets: ["latin"] });
 
 const Home: NextPage = () => {
-    const model = useRef<SessionWrapper | null>(null);
+    const session = useRef<InferenceSession | null>(null);
     const [loaded, setLoaded] = useState(false);
     const [loading, setLoading] = useState(false);
     const loadingToastId = useRef<string | null>(null); // Store the loading toast id
@@ -50,12 +50,12 @@ const Home: NextPage = () => {
                 onAccept={() => {
                     (async () => {
                         setLoading(true);
-                        let modelManager = new ModelManager();
-                        let loadedModel = await modelManager.loadModel(
+                        let manager = new SessionManager();
+                        let modelSession = await manager.loadModel(
                             AvailableModels.FLAN_T5_BASE,
                             () => setLoaded(true)
                         );
-                        model.current = loadedModel;
+                        session.current = modelSession;
                     })();
                 }}
             />
@@ -69,7 +69,7 @@ const Home: NextPage = () => {
                     <div className="mx-auto flex flex-1 flex-col justify-center content-center align-center h-full w-full">
                         <div className="text-center bg-stone-50 flex flex-1 py-16">
                             <div className="flex flex-1 max-w-3xl xl:max-w-4xl 2xl:max-w-5xl mx-auto bg-white py-12 px-8 rounded-t-md shadow-lg h-full border">
-                                <SummizeEditor model={model.current} />
+                                <SummizeEditor session={session.current} />
                             </div>
                         </div>
                     </div>

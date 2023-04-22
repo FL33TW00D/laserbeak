@@ -1,6 +1,5 @@
 import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
 import { v4 as uuidv4 } from "uuid";
-import { AvailableModels } from "../modelManager";
 import {
     DBModel,
     DBTensor,
@@ -9,6 +8,7 @@ import {
     ModelWithKey,
 } from "./types";
 import pLimit from "p-limit";
+import { AvailableModels } from "../models";
 
 //Fetch concurrency limit
 const fetchLimit = pLimit(4);

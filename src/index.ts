@@ -1,3 +1,3 @@
-export { ModelManager, AvailableModels } from "./modelManager";
-export { Session } from "./session.worker";
-export { SessionWrapper } from "./session-wrapper";
+export { InferenceSession } from './inferenceSession';
+export { AvailableModels } from "./models";
+export { SessionManager } from "./sessionManager";
