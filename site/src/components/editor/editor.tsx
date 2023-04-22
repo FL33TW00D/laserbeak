@@ -6,31 +6,23 @@ import React, {
     useContext,
     useCallback,
 } from "react";
-import {
-    Slate,
-    Editable,
-    withReact,
-    useSlate,
-    useFocused,
-    ReactEditor,
-} from "slate-react";
+import { Slate, Editable, withReact, useSlate, useFocused } from "slate-react";
 import {
     Editor,
     Transforms,
     Text,
     createEditor,
-    Descendant,
     Point,
     Element as SlateElement,
     Range,
-    Node as SlateNode,
 } from "slate";
 import { css } from "@emotion/css";
 import { withHistory } from "slate-history";
 import { BulletedListElement } from "../../custom-types";
 
-import { Button, Icon, Menu, Portal } from "./components";
+import { Button, Icon, Menu, Portal, LanguageSelector } from "./components";
 import { InferenceSession } from "@rumbl/laserbeak";
+import defaultText from "./defaultText";
 
 const sessionContext = React.createContext<InferenceSession | null>(null);
 
@@ -62,76 +54,15 @@ const SummizeEditor = (props: EditorProps) => {
         () => withShortcuts(withReact(withHistory(createEditor()))),
         []
     );
-    const handleDOMBeforeInput = useCallback(
-        (e: InputEvent) => {
-            switch (e.inputType) {
-                case "formatBold":
-                    e.preventDefault();
-                    toggleFormat(editor, "bold");
-                    break;
-                case "formatItalic":
-                    e.preventDefault();
-                    toggleFormat(editor, "italic");
-                    break;
-                case "formatunderline":
-                    e.preventDefault();
-                    toggleFormat(editor, "underlined");
-                    break;
-                case "summarize":
-                    e.preventDefault();
-                    handleSummarize(session, editor);
-                    break;
-            }
-            queueMicrotask(() => {
-                const pendingDiffs = ReactEditor.androidPendingDiffs(editor);
-
-                const scheduleFlush = pendingDiffs?.some(({ diff, path }) => {
-                    if (!diff.text.endsWith(" ")) {
-                        return false;
-                    }
-
-                    const { text } = SlateNode.leaf(editor, path);
-                    const beforeText =
-                        text.slice(0, diff.start) + diff.text.slice(0, -1);
-                    if (!(beforeText in SHORTCUTS)) {
-                        return;
-                    }
-
-                    const blockEntry = Editor.above(editor, {
-                        at: path,
-                        match: (n) =>
-                            SlateElement.isElement(n) &&
-                            Editor.isBlock(editor, n),
-                    });
-                    if (!blockEntry) {
-                        return false;
-                    }
-
-                    const [, blockPath] = blockEntry;
-                    return Editor.isStart(
-                        editor,
-                        Editor.start(editor, path),
-                        blockPath
-                    );
-                });
-
-                if (scheduleFlush) {
-                    ReactEditor.androidScheduleFlush(editor);
-                }
-            });
-        },
-        [editor, session]
-    );
 
     return (
-        <Slate editor={editor} value={initialValue}>
+        <Slate editor={editor} value={defaultText}>
             <sessionContext.Provider value={session}>
                 <HoveringToolbar />
                 <Editable
                     renderLeaf={(props) => <Leaf {...props} />}
                     placeholder="Enter some text..."
                     renderElement={renderElement}
-                    onDOMBeforeInput={handleDOMBeforeInput}
                     style={{
                         minWidth: "90%",
                     }}
@@ -173,14 +104,45 @@ async function runSample(
     }
 }
 
-const handleSummarize = (session: InferenceSession | null, editor: Editor) => {
-    if (!editor.selection) {
+const handlePrompt = (
+    prompt: string,
+    session: InferenceSession | null,
+    editor: Editor
+) => {
+    if (!editor || !editor.selection) {
         return;
     }
     let input_selection = Editor.string(editor, editor.selection);
-    let input_text = `Summarize\n\n${input_selection}`;
+    let input_text = `${prompt}${input_selection}`;
     Transforms.delete(editor, { at: editor.selection });
     runSample(session, editor, input_text, editor.selection);
+};
+
+const handleSummarize = (session: InferenceSession | null, editor: Editor) => {
+    if (!editor || !editor.selection) {
+        return;
+    }
+    let input_selection = Editor.string(editor, editor.selection);
+    let prompt = `Summarize:\n\n${input_selection}`;
+    handlePrompt(prompt, session, editor);
+};
+
+const handleStructured = (session: InferenceSession | null, editor: Editor) => {
+    if (!editor || !editor.selection) {
+        return;
+    }
+    let input_selection = Editor.string(editor, editor.selection);
+    let prompt = `What is the version of the following sentence with correct punctuation?\n\n ${input_selection}`;
+    handlePrompt(prompt, session, editor);
+};
+
+const handleTranslate = (
+    lang1: string,
+    lang2: string,
+    session: InferenceSession | null,
+    editor: Editor
+) => {
+    handlePrompt(`Translate from ${lang1} to ${lang2}:\n\n`, session, editor);
 };
 
 const toggleFormat = (editor: Editor, format: string) => {
@@ -281,6 +243,7 @@ const HoveringToolbar = () => {
                 <FormatButton format="italic" icon="format_italic" />
                 <FormatButton format="underlined" icon="format_underlined" />
                 <SummarizeButton />
+                <StructuredButton />
             </Menu>
         </Portal>
     );
@@ -305,6 +268,16 @@ const SummarizeButton = () => {
     return (
         <Button reversed onClick={() => handleSummarize(session, editor)}>
             <Icon>{"summarize"}</Icon>
+        </Button>
+    );
+};
+
+const StructuredButton = () => {
+    const editor = useSlate();
+    const session = useContext(sessionContext);
+    return (
+        <Button reversed onClick={() => handleStructured(session, editor)}>
+            <Icon>{"format_list_bulleted"}</Icon>
         </Button>
     );
 };
@@ -431,63 +404,5 @@ const Element = ({ attributes, children, element }) => {
             return <p {...attributes}>{children}</p>;
     }
 };
-const initialValue: Descendant[] = [
-    {
-        type: "paragraph",
-        children: [
-            {
-                text: "This document reflects the strategy we’ve refined over the past two years, including feedback from many people internal and external to OpenAI. The timeline to AGI remains uncertain, but our Charter will guide us in acting in the best interests of humanity throughout its development. OpenAI’s mission is to ensure that artificial general intelligence (AGI)—by which we mean highly autonomous systems that outperform humans at most economically valuable work—benefits all of humanity. We will attempt to directly build safe and beneficial AGI, but will also consider our mission fulfilled if our work aids others to achieve this outcome. To that end, we commit to the following principles:",
-            },
-        ],
-    },
-    {
-        type: "heading-two",
-        children: [{ text: "Broadly distributed benefits" }],
-    },
-    {
-        type: "paragraph",
-        children: [
-            {
-                text: "We commit to use any influence we obtain over AGI’s deployment to ensure it is used for the benefit of all, and to avoid enabling uses of AI or AGI that harm humanity or unduly concentrate power. Our primary fiduciary duty is to humanity. We anticipate needing to marshal substantial resources to fulfill our mission, but will always diligently act to minimize conflicts of interest among our employees and stakeholders that could compromise broad benefit.",
-            },
-        ],
-    },
-    {
-        type: "heading-two",
-        children: [{ text: "Long-term safety" }],
-    },
-    {
-        type: "paragraph",
-        children: [
-            {
-                text: "We are committed to doing the research required to make AGI safe, and to driving the broad adoption of such research across the AI community. We are concerned about late-stage AGI development becoming a competitive race without time for adequate safety precautions. Therefore, if a value-aligned, safety-conscious project comes close to building AGI before we do, we commit to stop competing with and start assisting this project. We will work out specifics in case-by-case agreements, but a typical triggering condition might be “a better-than-even chance of success in the next two years.",
-            },
-        ],
-    },
-    {
-        type: "heading-two",
-        children: [{ text: "Technical Leadership" }],
-    },
-    {
-        type: "paragraph",
-        children: [
-            {
-                text: "To be effective at addressing AGI’s impact on society, OpenAI must be on the cutting edge of AI capabilities—policy and safety advocacy alone would be insufficient. We believe that AI will have broad societal impact before AGI, and we’ll strive to lead in those areas that are directly aligned with our mission and expertise.",
-            },
-        ],
-    },
-    {
-        type: "heading-two",
-        children: [{ text: "Cooperative Coordination" }],
-    },
-    {
-        type: "paragraph",
-        children: [
-            {
-                text: "We will actively cooperate with other research and policy institutions; we seek to create a global community working together to address AGI’s global challenges. We are committed to providing public goods that help society navigate the path to AGI. Today this includes publishing most of our AI research, but we expect that safety and security concerns will reduce our traditional publishing in the future, while increasing the importance of sharing safety, policy, and standards research.",
-            },
-        ],
-    },
-];
 
 export default SummizeEditor;
