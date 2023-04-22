@@ -2,9 +2,15 @@ import * as rumble from "@rumbl/rumble-wasm";
 import ModelDB from "./db/modelDB";
 import { DBModel } from "./db/types";
 
+export enum AvailableModels {
+    FLAN_T5_SMALL = "flan_t5_small",
+    FLAN_T5_BASE = "flan_t5_base",
+    FLAN_T5_LARGE = "flan_t5_large",
+}
+
 export class Model {
     name: string;
-    definition: Uint8Array; //ONNX file
+    definition: Uint8Array; //ONNX file bytes
     tensors: Map<string, Uint8Array>;
     config?: Uint8Array;
     tokenizer?: Uint8Array;

@@ -30,8 +30,9 @@ import { withHistory } from "slate-history";
 import { BulletedListElement } from "../../custom-types";
 
 import { Button, Icon, Menu, Portal } from "./components";
+import { InferenceSession } from "@rumbl/laserbeak";
 
-const modelContext = React.createContext<any | null>(null);
+const sessionContext = React.createContext<InferenceSession | null>(null);
 
 const SHORTCUTS = {
     "*": "list-item",
@@ -47,13 +48,16 @@ const SHORTCUTS = {
 };
 
 interface EditorProps {
-    model: any;
+    session: InferenceSession | null;
 }
 
 const SummizeEditor = (props: EditorProps) => {
-    const { model } = props;
+    const { session } = props;
 
-    const renderElement = useCallback((props: any) => <Element {...props} />, []);
+    const renderElement = useCallback(
+        (props: any) => <Element {...props} />,
+        []
+    );
     const editor = useMemo(
         () => withShortcuts(withReact(withHistory(createEditor()))),
         []
@@ -75,7 +79,7 @@ const SummizeEditor = (props: EditorProps) => {
                     break;
                 case "summarize":
                     e.preventDefault();
-                    handleSummarize(model, editor);
+                    handleSummarize(session, editor);
                     break;
             }
             queueMicrotask(() => {
@@ -116,12 +120,12 @@ const SummizeEditor = (props: EditorProps) => {
                 }
             });
         },
-        [editor, model]
+        [editor, session]
     );
 
     return (
         <Slate editor={editor} value={initialValue}>
-            <modelContext.Provider value={model}>
+            <sessionContext.Provider value={session}>
                 <HoveringToolbar />
                 <Editable
                     renderLeaf={(props) => <Leaf {...props} />}
@@ -135,25 +139,25 @@ const SummizeEditor = (props: EditorProps) => {
                     spellCheck
                     autoFocus
                 />
-            </modelContext.Provider>
+            </sessionContext.Provider>
         </Slate>
     );
 };
 
 async function runSample(
-    model: any,
+    session: InferenceSession | null,
     editor: Editor,
     inputText: string,
-    selection: Range 
+    selection: Range
 ) {
     try {
-        if (!model || !inputText || inputText.length < 2) {
+        if (!session || !inputText || inputText.length < 2) {
             return;
         }
         let start_location = selection.focus;
         const start = performance.now();
         let prevOutput = "";
-        await model.run(inputText, (output: string) => {
+        await session.run(inputText, (output: string) => {
             Transforms.insertText(editor, output.substring(prevOutput.length), {
                 at: {
                     path: start_location.path,
@@ -169,14 +173,14 @@ async function runSample(
     }
 }
 
-const handleSummarize = (model: any, editor: Editor) => {
+const handleSummarize = (session: InferenceSession | null, editor: Editor) => {
     if (!editor.selection) {
         return;
     }
     let input_selection = Editor.string(editor, editor.selection);
     let input_text = `Summarize\n\n${input_selection}`;
     Transforms.delete(editor, { at: editor.selection });
-    runSample(model, editor, input_text, editor.selection);
+    runSample(session, editor, input_text, editor.selection);
 };
 
 const toggleFormat = (editor: Editor, format: string) => {
@@ -297,9 +301,9 @@ const FormatButton = ({ format, icon }) => {
 
 const SummarizeButton = () => {
     const editor = useSlate();
-    const model = useContext(modelContext);
+    const session = useContext(sessionContext);
     return (
-        <Button reversed onClick={() => handleSummarize(model, editor)}>
+        <Button reversed onClick={() => handleSummarize(session, editor)}>
             <Icon>{"summarize"}</Icon>
         </Button>
     );
