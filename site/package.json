@@ -17,7 +17,6 @@
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.0",
     "react-responsive-modal": "^6.4.1",
-    "react-select": "^5.7.2",
     "slate-history": "^0.93.0",
     "slate-react": "^0.93.0"
   },

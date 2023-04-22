@@ -5,7 +5,6 @@ import React, {
     useEffect,
     useContext,
     useCallback,
-    useState,
 } from "react";
 import { Slate, Editable, withReact, useSlate, useFocused } from "slate-react";
 import {

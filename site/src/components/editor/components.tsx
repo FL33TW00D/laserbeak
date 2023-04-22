@@ -2,9 +2,6 @@
 import React, {
     Ref,
     PropsWithChildren,
-    useState,
-    useRef,
-    useEffect,
 } from "react";
 import ReactDOM from "react-dom";
 import { cx, css } from "@emotion/css";
@@ -14,39 +11,6 @@ interface BaseProps {
     [key: string]: unknown;
 }
 type OrNull<T> = T | null;
-
-export const Dropdown = React.forwardRef(
-    (
-        {
-            className,
-            active,
-            reversed,
-            ...props
-        }: PropsWithChildren<
-            {
-                active: boolean;
-                reversed: boolean;
-            } & BaseProps
-        >,
-        ref: Ref<OrNull<HTMLSpanElement>>
-    ) => (
-        <select
-            {...props}
-            ref={ref as Ref<HTMLSpanElement>}
-            className={cx(
-                className,
-                css`
-                    cursor: pointer;
-                `
-            )}
-        >
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-        </select>
-    )
-);
-Dropdown.displayName = "Button";
 
 export const Button = React.forwardRef(
     (
