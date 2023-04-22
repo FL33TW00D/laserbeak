@@ -41,14 +41,12 @@ const ChromeDownloadModal = (props: ModalProps) => {
                             Welcome to Summize!
                         </h2>
                         <p>
-                            Summize is a demo of my Rust + WebGPU ML model
-                            runtime. In this demo it is running a 250M parameter
-                            LLM.
+                            Summize is a local AI powered document editor. Try
+                            out our summarization and translation features!
                         </p>
                         <p>
-                            When you press continue, this site performs a 900+MB
-                            download. Please be patient while the model is
-                            downloaded.
+                            When you press continue, this site performs a 900MB
+                            download. Please be patient.
                         </p>
                         <div className="flex flex-row gap-x-2">
                             <button

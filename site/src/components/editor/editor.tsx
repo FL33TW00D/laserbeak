@@ -71,6 +71,7 @@ const SummizeEditor = (props: EditorProps) => {
                     renderElement={renderElement}
                     style={{
                         minWidth: "90%",
+                        minHeight: "90%",
                     }}
                     className="prose mx-auto"
                     spellCheck
