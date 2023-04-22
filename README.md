@@ -52,11 +52,11 @@ await session.run(prompt, (output: string) => {
 
 Laserbeak is still a _pre_pre_alpha_ project, here's our roadmap:
 
--   [ ] F16 support for more efficient computation
--   [ ] Shader optimizations for better performance
+-   [ ] F16 support 
+-   [ ] Shader optimizations 
 -   [ ] Expanded model support (Whisper, UNet)
--   [ ] INT8, INT4 support for reduced memory usage
 -   [ ] Unannounced features 🤫
+-   [ ] INT8, INT4 support 
 
 Stay tuned for exciting updates!
 
