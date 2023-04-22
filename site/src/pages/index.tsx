@@ -1,15 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import SummizeEditor from "../components/editor/editor";
-import {
-    Inter,
-    Josefin_Sans,
-    Montserrat,
-    Open_Sans,
-    Roboto,
-    Rubik,
-    Work_Sans,
-} from "@next/font/google";
+import { Open_Sans } from "@next/font/google";
 import ChromeDownloadModal from "../components/modals/modal";
 import React, { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
@@ -92,9 +84,7 @@ const Home: NextPage = () => {
                 }}
             />
 
-            <main
-                className="min-h-screen max-h-screen flex flex-col overflow-auto"
-            >
+            <main className="min-h-screen max-h-screen flex flex-col overflow-auto">
                 <Toaster />
                 <div className="flex-1 flex flex-col ">
                     <div className="flex flex-row w-full justify-between bg-dark py-2 px-4 items-center">
@@ -105,6 +95,7 @@ const Home: NextPage = () => {
                             <a
                                 href="https://fleetwood.dev/posts/running-llms-in-the-browser"
                                 target="_blank"
+                                rel="noreferrer"
                             >
                                 Learn more here
                             </a>
