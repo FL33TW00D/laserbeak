@@ -1,36 +1,28 @@
 {
-  "name": "@rumbl/laserbeak",
-  "version": "0.5.1",
-  "author": "Christopher Fleetwood",
-  "description": "ML on the GPU comes to the browser",
-  "repository": "FL33TW00D/laserbeak",
-  "keywords": [
-    "rust",
-    "WebGPU",
-    "ML",
-    "Machine Learning",
-    "AI"
-  ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "devDependencies": {
-    "@types/node": "^14.11.2",
-    "@types/uuid": "^9.0.1",
-    "typescript": "~4.7.0"
-  },
-  "scripts": {
-    "build": "rm -rf ./dist && tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint ./src"
-  },
-  "dependencies": {
-    "@rumbl/rumble-wasm": "0.5.0",
-    "comlink": "4.3.1",
-    "idb": "^7.1.1",
-    "p-limit": "^4.0.0",
-    "uuid": "^9.0.0"
-  },
-  "files": [
-    "dist/**/*"
-  ]
+    "name": "@rumbl/laserbeak",
+    "version": "0.5.2",
+    "author": "Christopher Fleetwood <chris@fleetwood.dev>",
+    "description": "ML on the GPU comes to the browser",
+    "repository": "FL33TW00D/laserbeak",
+    "keywords": ["rust", "WebGPU", "ML", "Machine Learning", "AI"],
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "devDependencies": {
+        "@types/node": "^14.11.2",
+        "@types/uuid": "^9.0.1",
+        "typescript": "~4.7.0"
+    },
+    "scripts": {
+        "build": "rm -rf ./dist && tsc",
+        "format": "prettier --write \"src/**/*.ts\"",
+        "lint": "eslint ./src"
+    },
+    "dependencies": {
+        "@rumbl/rumble-wasm": "0.5.0",
+        "comlink": "4.3.1",
+        "idb": "^7.1.1",
+        "p-limit": "^4.0.0",
+        "uuid": "^9.0.0"
+    },
+    "files": ["dist/**/*"]
 }
