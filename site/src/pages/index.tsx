@@ -4,15 +4,14 @@ import SummizeEditor from "../components/editor/editor";
 import { Inter } from "@next/font/google";
 import ChromeDownloadModal from "../components/modals/modal";
 import React, { useEffect, useState, useRef } from "react";
-import { ModelManager, AvailableModels, Session } from "@rumbl/laserbeak";
+import { ModelManager, AvailableModels, SessionWrapper } from "@rumbl/laserbeak";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
-import * as Comlink from "comlink";
 
 const inter = Inter({ subsets: ["latin"] });
 
 const Home: NextPage = () => {
-    const model = useRef<Comlink.Remote<Session> | Session | null>(null);
+    const model = useRef<SessionWrapper | null>(null);
     const [loaded, setLoaded] = useState(false);
     const [loading, setLoading] = useState(false);
     const loadingToastId = useRef<string | null>(null); // Store the loading toast id

@@ -1,5 +1,5 @@
 import { createSession } from "./createSession";
-import * as Comlink from "comlink";
+import { SessionWrapper } from "./session-wrapper";
 
 export enum AvailableModels {
     FLAN_T5_SMALL = "flan_t5_small",
@@ -8,12 +8,9 @@ export enum AvailableModels {
 }
 
 export class ModelManager {
-    public async loadModel(model: AvailableModels, onLoaded: () => void) {
-        console.log("Loading model: ", model);
-        const callback = Comlink.proxy(onLoaded);
+    public async loadModel(model: AvailableModels, onLoaded: () => void): Promise<SessionWrapper> {
         let session = await createSession(true, model);
-        callback();
-        console.log("Model loaded: ", session);
+        onLoaded();
         return session;
     }
 }

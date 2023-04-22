@@ -4,7 +4,7 @@ import { DBModel } from "./db/types";
 
 export class Model {
     name: string;
-    definition: Uint8Array; //ONNX file
+    definition: Uint8Array; //ONNX file bytes
     tensors: Map<string, Uint8Array>;
     config?: Uint8Array;
     tokenizer?: Uint8Array;

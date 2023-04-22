@@ -54,7 +54,10 @@ interface EditorProps {
 const SummizeEditor = (props: EditorProps) => {
     const { model } = props;
 
-    const renderElement = useCallback((props: any) => <Element {...props} />, []);
+    const renderElement = useCallback(
+        (props: any) => <Element {...props} />,
+        []
+    );
     const editor = useMemo(
         () => withShortcuts(withReact(withHistory(createEditor()))),
         []
@@ -145,7 +148,7 @@ async function runSample(
     model: any,
     editor: Editor,
     inputText: string,
-    selection: Range 
+    selection: Range
 ) {
     try {
         if (!model || !inputText || inputText.length < 2) {
@@ -154,8 +157,7 @@ async function runSample(
         let start_location = selection.focus;
         const start = performance.now();
         let prevOutput = "";
-        console.log("ABOUT TO RUN MODEL: ", model);
-        await model.run(inputText, Comlink.proxy((output: string) => {
+        await model.run(inputText, (output: string) => {
             Transforms.insertText(editor, output.substring(prevOutput.length), {
                 at: {
                     path: start_location.path,
@@ -163,7 +165,7 @@ async function runSample(
                 },
             });
             prevOutput = output;
-        }));
+        });
         const duration = performance.now() - start;
         console.log("Inference time:", duration.toFixed(2), "ms");
     } catch (e: any) {
