@@ -5,6 +5,7 @@ import React, {
     useEffect,
     useContext,
     useCallback,
+    useState,
 } from "react";
 import { Slate, Editable, withReact, useSlate, useFocused } from "slate-react";
 import {
@@ -20,9 +21,17 @@ import { css } from "@emotion/css";
 import { withHistory } from "slate-history";
 import { BulletedListElement } from "../../custom-types";
 
-import { Button, Icon, Menu, Portal, LanguageSelector } from "./components";
+import {
+    Button,
+    Icon,
+    Menu,
+    Portal,
+    LanguageSelector,
+    Dropdown,
+} from "./components";
 import { InferenceSession } from "@rumbl/laserbeak";
 import defaultText from "./defaultText";
+import Select from "react-select";
 
 const sessionContext = React.createContext<InferenceSession | null>(null);
 
@@ -127,22 +136,18 @@ const handleSummarize = (session: InferenceSession | null, editor: Editor) => {
     handlePrompt(prompt, session, editor);
 };
 
-const handleStructured = (session: InferenceSession | null, editor: Editor) => {
-    if (!editor || !editor.selection) {
-        return;
-    }
-    let input_selection = Editor.string(editor, editor.selection);
-    let prompt = `What is the version of the following sentence with correct punctuation?\n\n ${input_selection}`;
-    handlePrompt(prompt, session, editor);
-};
-
 const handleTranslate = (
     lang1: string,
     lang2: string,
     session: InferenceSession | null,
     editor: Editor
 ) => {
-    handlePrompt(`Translate from ${lang1} to ${lang2}:\n\n`, session, editor);
+    if (!editor || !editor.selection) {
+        return;
+    }
+    let input_selection = Editor.string(editor, editor.selection);
+    let prompt = `Translate from ${lang1} to ${lang2}:\n\n${input_selection}`;
+    handlePrompt(prompt, session, editor);
 };
 
 const toggleFormat = (editor: Editor, format: string) => {
@@ -243,7 +248,7 @@ const HoveringToolbar = () => {
                 <FormatButton format="italic" icon="format_italic" />
                 <FormatButton format="underlined" icon="format_underlined" />
                 <SummarizeButton />
-                <StructuredButton />
+                <TranslateButton />
             </Menu>
         </Portal>
     );
@@ -272,12 +277,17 @@ const SummarizeButton = () => {
     );
 };
 
-const StructuredButton = () => {
+const TranslateButton = () => {
     const editor = useSlate();
     const session = useContext(sessionContext);
     return (
-        <Button reversed onClick={() => handleStructured(session, editor)}>
-            <Icon>{"format_list_bulleted"}</Icon>
+        <Button
+            reversed
+            onClick={() =>
+                handleTranslate("English", "German", session, editor)
+            }
+        >
+            <Icon>{"translate"}</Icon>
         </Button>
     );
 };
