@@ -26,12 +26,10 @@ import {
     Icon,
     Menu,
     Portal,
-    LanguageSelector,
-    Dropdown,
 } from "./components";
 import { InferenceSession } from "@rumbl/laserbeak";
 import defaultText from "./defaultText";
-import Select from "react-select";
+import { handleSummarize, handleTranslate } from "./commands";
 
 const sessionContext = React.createContext<InferenceSession | null>(null);
 
@@ -84,72 +82,6 @@ const SummizeEditor = (props: EditorProps) => {
     );
 };
 
-async function runSample(
-    session: InferenceSession | null,
-    editor: Editor,
-    inputText: string,
-    selection: Range
-) {
-    try {
-        if (!session || !inputText || inputText.length < 2) {
-            return;
-        }
-        let start_location = selection.focus;
-        const start = performance.now();
-        let prevOutput = "";
-        await session.run(inputText, (output: string) => {
-            Transforms.insertText(editor, output.substring(prevOutput.length), {
-                at: {
-                    path: start_location.path,
-                    offset: start_location.offset + prevOutput.length,
-                },
-            });
-            prevOutput = output;
-        });
-        const duration = performance.now() - start;
-        console.log("Inference time:", duration.toFixed(2), "ms");
-    } catch (e: any) {
-        console.log(e.toString());
-    }
-}
-
-const handlePrompt = (
-    prompt: string,
-    session: InferenceSession | null,
-    editor: Editor
-) => {
-    if (!editor || !editor.selection) {
-        return;
-    }
-    let input_selection = Editor.string(editor, editor.selection);
-    let input_text = `${prompt}${input_selection}`;
-    Transforms.delete(editor, { at: editor.selection });
-    runSample(session, editor, input_text, editor.selection);
-};
-
-const handleSummarize = (session: InferenceSession | null, editor: Editor) => {
-    if (!editor || !editor.selection) {
-        return;
-    }
-    let input_selection = Editor.string(editor, editor.selection);
-    let prompt = `Summarize:\n\n${input_selection}`;
-    handlePrompt(prompt, session, editor);
-};
-
-const handleTranslate = (
-    lang1: string,
-    lang2: string,
-    session: InferenceSession | null,
-    editor: Editor
-) => {
-    if (!editor || !editor.selection) {
-        return;
-    }
-    let input_selection = Editor.string(editor, editor.selection);
-    let prompt = `Translate from ${lang1} to ${lang2}:\n\n${input_selection}`;
-    handlePrompt(prompt, session, editor);
-};
-
 const toggleFormat = (editor: Editor, format: string) => {
     const isActive = isFormatActive(editor, format);
     Transforms.setNodes(
@@ -176,6 +108,10 @@ interface LeafProps {
 const Leaf = ({ attributes, children, leaf }: LeafProps) => {
     if (leaf.bold) {
         children = <strong>{children}</strong>;
+    }
+
+    if (leaf.code) {
+        children = <code>{children}</code>;
     }
 
     if (leaf.italic) {
@@ -247,6 +183,7 @@ const HoveringToolbar = () => {
                 <FormatButton format="bold" icon="format_bold" />
                 <FormatButton format="italic" icon="format_italic" />
                 <FormatButton format="underlined" icon="format_underlined" />
+                <FormatButton format="code" icon="code" />
                 <SummarizeButton />
                 <TranslateButton />
             </Menu>
