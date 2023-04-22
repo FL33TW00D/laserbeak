@@ -1,4 +1,3 @@
-
 <div align="center">
 <img width="600px" height="200px" src="https://github.com/FL33TW00D/laserbeak/raw/master/.github/Laserbeak.png">
 </div>
@@ -10,10 +9,10 @@ It is designed to efficiently manage models by caching them in IndexedDB and sha
 
 ## 🌟 Features
 
-- Run transformer models in the browser using WebGPU
-- Built on top of a custom Rust runtime for performance
-- Efficient model management with caching and weight sharing
-- Easy-to-use API for loading and running models
+-   Run transformer models in the browser using WebGPU
+-   Built on top of a custom Rust runtime for performance
+-   Efficient model management with caching and weight sharing
+-   Easy-to-use API for loading and running models
 
 ## ⚡️ Quick start
 
@@ -28,21 +27,24 @@ npm i laserbeak
 Here's a simple example of how to load and run a model using Laserbeak:
 
 ```typescript
-import { ModelManager, AvailableModels } from "@rumbl/laserbeak";
+import {
+    SessionManager,
+    AvailableModels,
+    InferenceSession,
+} from "@rumbl/laserbeak";
 
-// Create a ModelManager instance
-let modelManager = await ModelManager.create();
+//Create a SessionManager instance
+let manager = new SessionManager();
 
-// Load a model with a callback for when it's loaded
-let model = await modelManager.loadModel(
-    AvailableModels.FLAN_T5_BASE,
-    () => console.log("Model loaded!")
+//Load a model with a callback for when it's loaded
+let modelSession = await manager.loadModel(AvailableModels.FLAN_T5_BASE, () =>
+    console.log("Loaded successfully!")
 );
 
 // Run the model with a prompt and handle the output
-await model.run(prompt, (output: string) => {
-  // Process the model output
-  console.log(output);
+await session.run(prompt, (output: string) => {
+    // Process the model output
+    console.log(output);
 });
 ```
 
@@ -50,11 +52,11 @@ await model.run(prompt, (output: string) => {
 
 Laserbeak is still a _pre_pre_alpha_ project, here's our roadmap:
 
-- [ ] F16 support for more efficient computation
-- [ ] Shader optimizations for better performance
-- [ ] Expanded model support (Whisper, UNet)
-- [ ] INT8, INT4 support for reduced memory usage
-- [ ] Unannounced features 🤫
+-   [ ] F16 support for more efficient computation
+-   [ ] Shader optimizations for better performance
+-   [ ] Expanded model support (Whisper, UNet)
+-   [ ] INT8, INT4 support for reduced memory usage
+-   [ ] Unannounced features 🤫
 
 Stay tuned for exciting updates!
 
