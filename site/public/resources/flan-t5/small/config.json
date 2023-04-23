@@ -1,0 +1,13 @@
+{
+  "d_ff": 2048,
+  "d_kv": 64,
+  "d_model": 512,
+  "decoder_start_token_id": 0,
+  "eos_token_id": 1,
+  "num_heads": 6,
+  "num_layers": 8,
+  "pad_token_id": 0,
+  "relative_attention_max_distance": 128,
+  "relative_attention_num_buckets": 32,
+  "vocab_size": 32128
+}
