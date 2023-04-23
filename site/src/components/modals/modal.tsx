@@ -30,19 +30,30 @@ const ChromeDownloadModal = (props: ModalProps) => {
         <>
             <Modal
                 classNames={{
-                    modal: "rounded-lg w-1/2 md:w-1/2 xl:w-1/3 2xl:w-1/4 h-3/4 md:h-2/3 2xl:h-1/2 overflow-x-hidden",
+                    modal: "rounded-lg w-1/2 md:w-1/2 xl:w-1/3 2xl:w-1/4 overflow-x-hidden !bg-stone-50",
                 }}
                 open={isModalOpen}
                 onClose={handleModalClose}
+                center
             >
                 {isChrome ? (
-                    <div className="flex h-full w-full flex-col text-center items-center justify-center prose p-4">
+                    <div className="flex flex-col text-center items-center justify-center prose p-4 my-8">
                         <h2 className="text-2xl font-bold pb-4">
                             Welcome to Summize!
                         </h2>
                         <p>
-                            Summize is a local AI powered document editor. Try
-                            out our summarization and translation features!
+                            Summize is a local AI powered document editor.
+                        </p>
+                        <Image
+                            src="/toolbar.apng"
+                            alt="Chrome is required."
+                            width={500}
+                            height={100}
+                            className="mx-auto rounded-lg border border-stone-100 py-0 my-0"
+                        />
+                        <p>
+                            Select some text to try out our summarization and
+                            translation features!
                         </p>
                         <p>
                             When you press continue, this site performs a 900MB
@@ -75,7 +86,7 @@ const ChromeDownloadModal = (props: ModalProps) => {
                     <div className="flex flex-col h-full text-center">
                         <Image
                             src="/chrome.png"
-                            alt="Picture of the author"
+                            alt="Chrome is required."
                             width={250}
                             height={250}
                             className="mx-auto pt-4"
