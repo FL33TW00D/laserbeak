@@ -35,7 +35,7 @@ const handlePrompt = (
     session: InferenceSession | null,
     editor: Editor
 ) => {
-    if (!editor || !editor.selection) {
+    if (!editor || !editor.selection || !session) {
         return;
     }
     let input_selection = Editor.string(editor, editor.selection);
@@ -44,7 +44,10 @@ const handlePrompt = (
     runSample(session, editor, input_text, editor.selection);
 };
 
-export const handleSummarize = (session: InferenceSession | null, editor: Editor) => {
+export const handleSummarize = (
+    session: InferenceSession | null,
+    editor: Editor
+) => {
     if (!editor || !editor.selection) {
         return;
     }
