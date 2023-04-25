@@ -221,7 +221,7 @@ const TranslateButton = () => {
         <Button
             reversed
             onClick={() =>
-                handleTranslate("English", "German", session, editor)
+                handleTranslate("English", "French", session, editor)
             }
         >
             <Icon>{"translate"}</Icon>

@@ -66,6 +66,6 @@ export const handleTranslate = (
         return;
     }
     let input_selection = Editor.string(editor, editor.selection);
-    let prompt = `Translate from ${lang1} to ${lang2}:\n\n${input_selection}`;
+    let prompt = `Translate to ${lang2}:\n\n${input_selection}`;
     handlePrompt(prompt, session, editor);
 };
