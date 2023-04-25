@@ -149,7 +149,10 @@ const HoveringToolbar = () => {
         }
 
         const domSelection = window.getSelection();
-        const domRange = domSelection!.getRangeAt(0);
+        if (!domSelection) {
+            return;
+        }
+        const domRange = domSelection.getRangeAt(0);
         const rect = domRange.getBoundingClientRect();
         el.style.opacity = "1";
         el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
