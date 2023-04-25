@@ -18,17 +18,20 @@ export const Button = React.forwardRef(
             className,
             active,
             reversed,
+            title,
             ...props
         }: PropsWithChildren<
             {
                 active: boolean;
                 reversed: boolean;
+                title: string;
             } & BaseProps
         >,
         ref: Ref<OrNull<HTMLSpanElement>>
     ) => (
         <span
             {...props}
+            title={title}
             ref={ref as Ref<HTMLSpanElement>}
             className={cx(
                 className,
