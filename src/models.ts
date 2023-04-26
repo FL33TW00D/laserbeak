@@ -6,6 +6,7 @@ export enum AvailableModels {
     FLAN_T5_SMALL = "flan_t5_small",
     FLAN_T5_BASE = "flan_t5_base",
     FLAN_T5_LARGE = "flan_t5_large",
+    LAMINI_FLAN_T5_BASE = "lamini_flan_base",
 }
 
 export class Model {

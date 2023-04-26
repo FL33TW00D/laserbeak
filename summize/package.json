@@ -1,0 +1,36 @@
+{
+  "name": "summize",
+  "version": "1.4.0",
+  "scripts": {
+    "dev": "next dev",
+    "build:wasm": "wasm-pack build wasm --release --target web",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.10.6",
+    "@next/font": "13.1.0",
+    "@rumbl/laserbeak": "0.5.3",
+    "next": "13.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.0",
+    "react-responsive-modal": "^6.4.1",
+    "slate-history": "^0.93.0",
+    "slate-react": "^0.93.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.9",
+    "@types/node": "18.11.9",
+    "@types/react": "18.0.25",
+    "@types/react-dom": "18.0.9",
+    "autoprefixer": "^10.4.13",
+    "eslint": "8.28.0",
+    "eslint-config-next": "13.0.5",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.7",
+    "typescript": "4.9.3",
+    "wasm-pack": "0.10.3"
+  }
+}
