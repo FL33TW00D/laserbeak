@@ -5,7 +5,11 @@
 
 Laserbeak enables developers to run transformer models in the browser/Electron using WebGPU.
 
-It is designed to efficiently manage models by caching them in IndexedDB and sharing weights between encoder-decoder models for optimal performance. To see what it can do, check out our [example site](https://summize.fleetwood.dev).
+It is designed to efficiently manage models by caching them in IndexedDB and sharing weights between encoder-decoder models for optimal performance. 
+
+To see what it can do, check out our:
+- [AI powered document editor](https://summize.fleetwood.dev).
+- [Explore all models on the playground](https://playground.fleetwood.dev).
 
 ## 🌟 Features
 
