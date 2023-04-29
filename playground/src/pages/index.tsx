@@ -72,16 +72,16 @@ const Home: NextPage = () => {
                             </a>
                         </h3>
                     </div>
-                    <div>
+                    <div className="flex flex-col p-4 w-1/2 mx-auto">
                         <textarea
-                            className="w-full h-96 bg-dark text-white"
+                            className="w-full h-64 bg-dark text-white p-2"
                             placeholder="Type here..."
                             onChange={(e) => {
                                 setPrompt(e.target.value);
                             }}
                         ></textarea>
                         <button
-                            className="bg-gradient-to-tr from-violet-500 to-orange-300 text-white font-bold py-2 px-4 rounded"
+                            className="w-16 bg-gradient-to-tr from-violet-500 to-orange-300 text-white font-bold py-2 px-4 my-4 rounded"
                             onClick={() => {
                                 runSample(session.current, prompt);
                             }}
@@ -89,12 +89,13 @@ const Home: NextPage = () => {
                             Run
                         </button>
 
-                        <div className="flex flex-row w-full justify-between bg-dark py-2 px-4 items-center">
+                        <div className="flex flex-col w-full bg-dark py-2 px-4">
                             <h1 className="text-white text-xl font-semibold">
                                 Output
                             </h1>
-
-                            <p className="text-white text-lg">{output}</p>
+                            <div>
+                                <p className="text-white text-lg">{output}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
