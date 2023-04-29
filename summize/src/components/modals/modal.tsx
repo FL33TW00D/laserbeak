@@ -50,6 +50,7 @@ const ChromeDownloadModal = (props: ModalProps) => {
                             width={500}
                             height={100}
                             className="mx-auto rounded-lg border border-stone-100 py-0 my-0"
+                            unoptimized
                         />
                         <p>
                             Select some text to try out our summarization and

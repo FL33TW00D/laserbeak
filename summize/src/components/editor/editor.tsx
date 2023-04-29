@@ -20,12 +20,7 @@ import { css } from "@emotion/css";
 import { withHistory } from "slate-history";
 import { BulletedListElement } from "../../custom-types";
 
-import {
-    Button,
-    Icon,
-    Menu,
-    Portal,
-} from "./components";
+import { Button, Icon, Menu, Portal } from "./components";
 import { InferenceSession } from "@rumbl/laserbeak";
 import defaultText from "./defaultText";
 import { handleSummarize, handleTranslate } from "./commands";
@@ -149,7 +144,10 @@ const HoveringToolbar = () => {
         }
 
         const domSelection = window.getSelection();
-        const domRange = domSelection!.getRangeAt(0);
+        if (!domSelection) {
+            return;
+        }
+        const domRange = domSelection.getRangeAt(0);
         const rect = domRange.getBoundingClientRect();
         el.style.opacity = "1";
         el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
@@ -196,6 +194,7 @@ const FormatButton = ({ format, icon }) => {
     return (
         <Button
             reversed
+            title={format.charAt(0).toUpperCase() + format.slice(1)}
             active={isFormatActive(editor, format)}
             onClick={() => toggleFormat(editor, format)}
         >
@@ -208,7 +207,11 @@ const SummarizeButton = () => {
     const editor = useSlate();
     const session = useContext(sessionContext);
     return (
-        <Button reversed onClick={() => handleSummarize(session, editor)}>
+        <Button
+            reversed
+            title={"Summarize"}
+            onClick={() => handleSummarize(session, editor)}
+        >
             <Icon>{"summarize"}</Icon>
         </Button>
     );
@@ -220,8 +223,9 @@ const TranslateButton = () => {
     return (
         <Button
             reversed
+            title={"Translate"}
             onClick={() =>
-                handleTranslate("English", "German", session, editor)
+                handleTranslate("English", "French", session, editor)
             }
         >
             <Icon>{"translate"}</Icon>
