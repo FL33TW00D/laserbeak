@@ -94,7 +94,7 @@ const Home: NextPage = () => {
                                 Output
                             </h1>
 
-                            <p>{output}</p>
+                            <p className="text-white text-lg">{output}</p>
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@ const Home: NextPage = () => {
                         setLoading(true);
                         let manager = new SessionManager();
                         let modelSession = await manager.loadModel(
-                            AvailableModels.FLAN_T5_BASE,
+                            AvailableModels.LAMINI_FLAN_T5_BASE,
                             () => setLoaded(true)
                         );
                         session.current = modelSession;
