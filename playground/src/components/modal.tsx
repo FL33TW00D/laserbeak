@@ -39,19 +39,9 @@ const ChromeDownloadModal = (props: ModalProps) => {
                 {isChrome ? (
                     <div className="flex flex-col text-center items-center justify-center prose p-4 my-8 text-black">
                         <h2 className="text-2xl font-bold pb-4">
-                            Welcome to Summize!
+                            Welcome to the Playground!
                         </h2>
-                        <p>
-                            Summize is a local AI powered document editor.
-                        </p>
-                        <p>
-                            Select some text to try out our summarization and
-                            translation features!
-                        </p>
-                        <p>
-                            When you press continue, this site performs a 900MB
-                            download. Please be patient.
-                        </p>
+                        <p>Experiment with different local models!</p>
                         <div className="flex flex-row gap-x-2">
                             <button
                                 onClick={handleModalClose}

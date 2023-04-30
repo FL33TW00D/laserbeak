@@ -19,6 +19,10 @@ const Home: NextPage = () => {
     const loadingToastId = useRef<string | null>(null); // Store the loading toast id
     const [output, setOutput] = useState("");
     const [prompt, setPrompt] = useState("");
+    const [selectedModel, setSelectedModel] = useState<AvailableModels | null>(
+        null
+    );
+    const [accepted, setAccepted] = useState(false);
 
     useEffect(() => {
         if (loaded) {
@@ -37,6 +41,22 @@ const Home: NextPage = () => {
             loadingToastId.current = toast.loading("Loading model...");
         }
     }, [loading]);
+
+    useEffect(() => {
+        if (selectedModel !== null && !loading && accepted) {
+            const loadModel = async () => {
+                setLoading(true);
+                let manager = new SessionManager();
+                let modelSession = await manager.loadModel(selectedModel, () =>
+                    setLoaded(true)
+                );
+                session.current = modelSession;
+                setLoading(false);
+            };
+
+            loadModel();
+        }
+    }, [selectedModel]);
 
     async function runSample(session: InferenceSession | null, prompt: string) {
         try {
@@ -73,6 +93,30 @@ const Home: NextPage = () => {
                         </h3>
                     </div>
                     <div className="flex flex-col p-4 w-1/2 mx-auto">
+                        <div className="flex items-center justify-between mb-4">
+                            <label htmlFor="model" className="mr-2 text-white">
+                                Select Model:
+                            </label>
+                            <select
+                                id="model"
+                                value={selectedModel ? selectedModel : "None"}
+                                onChange={(e) => {
+                                    if (e.target.value !== selectedModel) {
+                                        setSelectedModel(
+                                            e.target.value as AvailableModels
+                                        );
+                                    }
+                                }}
+                                className="bg-dark text-white p-2"
+                            >
+                                <option value="None">None</option>
+                                {Object.values(AvailableModels).map((model) => (
+                                    <option key={model} value={model}>
+                                        {model}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <textarea
                             className="w-full h-64 bg-dark text-white p-2"
                             placeholder="Type here..."
@@ -94,26 +138,14 @@ const Home: NextPage = () => {
                                 Output
                             </h1>
                             <div>
-                                <p className="text-white text-lg">{output}</p>
+                                <p className="text-white text-lg whitespace-pre-wrap">{output}</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <ChromeDownloadModal
-                onAccept={() => {
-                    (async () => {
-                        setLoading(true);
-                        let manager = new SessionManager();
-                        let modelSession = await manager.loadModel(
-                            AvailableModels.LAMINI_FLAN_T5_BASE,
-                            () => setLoaded(true)
-                        );
-                        session.current = modelSession;
-                    })();
-                }}
-            />
+            <ChromeDownloadModal onAccept={() => setAccepted(true)} />
         </Layout>
     );
 };
