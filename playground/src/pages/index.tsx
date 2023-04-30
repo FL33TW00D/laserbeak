@@ -99,7 +99,7 @@ const Home: NextPage = () => {
                             </a>
                         </h3>
                     </div>
-                    <div className="flex flex-col p-4 w-1/2 mx-auto">
+                    <div className="flex flex-col p-4 w-full md:w-3/4 lg:w-1/2 mx-auto">
                         <textarea
                             className="w-full h-48 bg-dark text-white p-2 rounded-md border border-slate-800"
                             placeholder="Type here..."
