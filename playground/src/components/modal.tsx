@@ -74,7 +74,7 @@ const ChromeDownloadModal = (props: ModalProps) => {
                             height={250}
                             className="mx-auto pt-4"
                         />
-                        <div className="pt-8">
+                        <div className="pt-8 text-black">
                             <p>
                                 This site requires Chrome version 113 or higher.
                             </p>
