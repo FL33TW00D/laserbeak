@@ -58,6 +58,12 @@ const Home: NextPage = () => {
         }
     }, [selectedModel]);
 
+    //Hack to format the output
+    function splitNumbered(text: string) {
+        let splits = text.split(/\s(?=\d+\.)/);
+        return splits.map((split) => split + "\n").join("");
+    }
+
     async function runSample(session: InferenceSession | null, prompt: string) {
         try {
             if (!session || !prompt || prompt.length < 2) {
@@ -65,7 +71,7 @@ const Home: NextPage = () => {
             }
             const start = performance.now();
             await session.run(prompt, (output: string) => {
-                setOutput(output);
+                setOutput(splitNumbered(output));
             });
             const duration = performance.now() - start;
             console.log("Inference time:", duration.toFixed(2), "ms");
@@ -138,7 +144,9 @@ const Home: NextPage = () => {
                                 Output
                             </h1>
                             <div>
-                                <p className="text-white text-lg whitespace-pre-wrap">{output}</p>
+                                <p className="text-white text-lg whitespace-pre-wrap">
+                                    {output}
+                                </p>
                             </div>
                         </div>
                     </div>
