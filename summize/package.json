@@ -11,7 +11,7 @@
   "dependencies": {
     "@emotion/css": "^11.10.6",
     "@next/font": "13.1.0",
-    "@rumbl/laserbeak": "0.6.0",
+    "@rumbl/laserbeak": "0.6.1",
     "next": "13.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
