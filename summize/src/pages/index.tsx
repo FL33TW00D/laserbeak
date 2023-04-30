@@ -12,7 +12,7 @@ import {
     InferenceSession,
 } from "@rumbl/laserbeak";
 
-const inter = Open_Sans({ subsets: ["latin"] });
+const open_sans = Open_Sans({ subsets: ["latin"] });
 
 const Home: NextPage = () => {
     const session = useRef<InferenceSession | null>(null);
@@ -59,7 +59,7 @@ const Home: NextPage = () => {
     }, []);
 
     return (
-        <div className={`p-0 ${inter.className}`}>
+        <div className={`p-0 ${open_sans.className}`}>
             <Head>
                 <title>Summize</title>
                 <meta name="description" content="AI Text Editor" />
