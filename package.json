@@ -1,6 +1,6 @@
 {
     "name": "@rumbl/laserbeak",
-    "version": "0.6.1",
+    "version": "0.7.0",
     "author": "Christopher Fleetwood <chris@fleetwood.dev>",
     "description": "ML on the GPU comes to the browser",
     "repository": "FL33TW00D/laserbeak",
@@ -18,7 +18,7 @@
         "lint": "eslint ./src"
     },
     "dependencies": {
-        "@rumbl/rumble-wasm": "0.6.0",
+        "@rumbl/rumble-wasm": "0.7.0",
         "comlink": "4.3.1",
         "idb": "^7.1.1",
         "p-limit": "^4.0.0",
