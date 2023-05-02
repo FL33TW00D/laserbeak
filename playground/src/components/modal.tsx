@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Modal from "react-responsive-modal";
 import Image from "next/image";
 
-const ChromeDownloadModal = (props: ModalProps) => {
+const ChromeDownloadModal = () => {
     const [isChrome, setIsChrome] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
 
@@ -17,9 +17,6 @@ const ChromeDownloadModal = (props: ModalProps) => {
 
     const handleModalClose = () => {
         setIsModalOpen(false);
-        if (isChrome) {
-            props.onAccept();
-        }
     };
 
     return (
