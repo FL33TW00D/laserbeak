@@ -11,7 +11,7 @@ type LayoutProps = {
 
 export default function Layout(props: LayoutProps) {
     return (
-        <div className="flex min-h-screen flex-col justify-center bg-stone-900">
+        <div className="flex min-h-screen flex-col justify-center bg-zinc-800">
             <Head>
                 <title>{props.title}</title>
                 <meta property="og:title" content={props.title} />
