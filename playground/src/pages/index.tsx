@@ -32,13 +32,11 @@ const Home: NextPage = () => {
                 toast.dismiss(loadingToastId!.current);
             }
             toast.success("Model loaded!");
+            setLoaded(false);
         }
     }, [loaded]);
 
     useEffect(() => {
-        if (loadingToastId.current) {
-            return;
-        }
         if (loading) {
             loadingToastId.current = toast.loading("Loading model...");
         }
@@ -46,7 +44,9 @@ const Home: NextPage = () => {
 
     useEffect(() => {
         if (selectedModel !== null && !loading) {
+            console.log("Selected model:", selectedModel);
             const loadModel = async () => {
+                session.current = null;
                 setLoading(true);
                 let manager = new SessionManager();
                 let modelSession = await manager.loadModel(selectedModel, () =>
@@ -93,11 +93,10 @@ const Home: NextPage = () => {
                             setSelectedModel={setSelectedModel}
                             selectedModel={selectedModel}
                             noneSelected={noneSelected}
-
                         />
                         <div className="flex flex-col p-12 w-full mx-auto">
                             <textarea
-                                className="w-full h-48 bg-zinc-800 text-white p-3 rounded-md border border-zinc-600"
+                                className="w-full h-48 bg-zinc-900 text-white p-3 rounded-md border-2 border-zinc-600"
                                 placeholder="Type here..."
                                 onChange={(e) => {
                                     setPrompt(e.target.value);
@@ -111,7 +110,7 @@ const Home: NextPage = () => {
                                             setNoneSelected(true);
                                             setTimeout(() => {
                                                 setNoneSelected(false);
-                                            }, 2000);
+                                            }, 1000);
                                             return;
                                         }
                                         runSample(session.current, prompt);
@@ -146,7 +145,7 @@ const Home: NextPage = () => {
                                     )}
                                 </button>
                             </div>
-                            <div className="flex flex-col w-full bg-zinc-800 py-2 px-4 border border-zinc-700 rounded-md">
+                            <div className="flex flex-col w-full bg-zinc-900 py-2 px-4 border border-zinc-700 rounded-md">
                                 <h1 className="text-white text-lg font-semibold">
                                     Output
                                 </h1>
