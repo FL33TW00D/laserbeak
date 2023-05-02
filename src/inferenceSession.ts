@@ -21,7 +21,7 @@ export class InferenceSession {
     ): Promise<void> {
         if (this.session instanceof Session) {
             return await this.session.run(input, callback);
-        }else {
+        } else {
             return await this.session.run(input, Comlink.proxy(callback));
         }
     }

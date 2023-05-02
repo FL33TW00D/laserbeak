@@ -1,6 +1,8 @@
+import { Manrope } from "@next/font/google";
 import { AvailableModels } from "@rumbl/laserbeak";
 import { useState } from "react";
 import RangeSlider from "./rangeSlider";
+const manrope = Manrope({ subsets: ["latin"] });
 
 interface SidebarProps {
     selectedModel: AvailableModels | null;
@@ -14,7 +16,7 @@ export default function Sidebar(props: SidebarProps) {
     const [maxLength, setMaxLength] = useState(512);
     return (
         <div className="flex flex-col p-8 md:w-1/4 mx-auto bg-zinc-900">
-            <h1 className="text-white text-lg font-semibold mx-auto tracking-wide">
+            <h1 className={`text-white text-lg font-semibold mx-auto tracking- ${manrope.className}`}>
                 playground
             </h1>
             <div className="flex flex-col w-full text-sm gap-8 pt-12">
@@ -35,7 +37,7 @@ export default function Sidebar(props: SidebarProps) {
                                 );
                             }
                         }}
-                        className={`transition ease-in-out delay-150 bg-zinc-800 text-white p-2 rounded-md border ${
+                        className={`transition duration-100 ease-in-out bg-zinc-800 text-white p-2 rounded-md border ${
                             noneSelected ? "border-red-500" : "border-zinc-700"
                         }`}
                     >

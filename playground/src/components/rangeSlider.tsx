@@ -33,7 +33,6 @@ export default function RangeSlider(props: RangeSliderProps) {
             <input
                 id={name}
                 type="range"
-                defaultValue={1.0}
                 min={min ? min : 0.0}
                 max={max ? max : 100.0}
                 step={step ? step : 1.0}
