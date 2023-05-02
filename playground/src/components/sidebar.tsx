@@ -1,5 +1,6 @@
 import { AvailableModels } from "@rumbl/laserbeak";
 import { useState } from "react";
+import RangeSlider from "./rangeSlider";
 
 interface SidebarProps {
     selectedModel: AvailableModels | null;
@@ -10,13 +11,14 @@ interface SidebarProps {
 export default function Sidebar(props: SidebarProps) {
     const { selectedModel, setSelectedModel, noneSelected } = props;
     const [repetitionPenalty, setRepetitionPenalty] = useState(1.0);
+    const [maxLength, setMaxLength] = useState(512);
     return (
         <div className="flex flex-col p-8 md:w-1/4 mx-auto bg-zinc-900">
             <h1 className="text-white text-lg font-semibold mx-auto tracking-wide">
                 playground
             </h1>
             <div className="flex flex-col w-full text-sm gap-8 pt-12">
-                <div>
+                <div className="flex flex-col">
                     <label
                         htmlFor="model"
                         className="mr-2 mb-2 text-white text-sm font-light mr-auto"
@@ -46,34 +48,22 @@ export default function Sidebar(props: SidebarProps) {
                     </select>
                 </div>
 
-                <div>
-                    <div className="flex flex-row justify-between items-center">
-                        <label
-                            htmlFor="repetition-penalty"
-                            className="mr-2 mb-2 text-white text-sm font-light mr-auto"
-                        >
-                            Repetition Penalty
-                        </label>
-                        <label
-                            htmlFor="repetition-penalty"
-                            className="mr-2 mb-2 text-white text-lg font-normal ml-auto"
-                        >
-                            {repetitionPenalty}
-                        </label>
-                    </div>
-                    <input
-                        id="repetition-penalty"
-                        type="range"
-                        defaultValue={1.0}
-                        min={0.01}
-                        max={2.0}
-                        step={0.01}
-                        className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-rose-400"
-                        onChange={(e) => {
-                            setRepetitionPenalty(parseFloat(e.target.value));
-                        }}
-                    ></input>
-                </div>
+                <RangeSlider
+                    name="Repetition Penalty"
+                    value={repetitionPenalty}
+                    setValue={setRepetitionPenalty}
+                    min={0.0}
+                    max={2.0}
+                    step={0.01}
+                />
+                <RangeSlider
+                    name="Max Length"
+                    value={maxLength}
+                    setValue={setMaxLength}
+                    min={1}
+                    max={1024}
+                    step={1}
+                />
             </div>
         </div>
     );
