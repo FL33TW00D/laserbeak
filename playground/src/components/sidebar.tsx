@@ -1,6 +1,5 @@
 import { Manrope } from "@next/font/google";
-import { AvailableModels } from "@rumbl/laserbeak";
-import { useState } from "react";
+import { AvailableModels, GenerationConfig } from "@rumbl/laserbeak";
 import RangeSlider from "./rangeSlider";
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -8,15 +7,24 @@ interface SidebarProps {
     selectedModel: AvailableModels | null;
     setSelectedModel: (model: AvailableModels | null) => void;
     noneSelected: boolean;
+    generationConfig: GenerationConfig;
+    setGenerationConfig: (config: GenerationConfig) => void;
 }
 
 export default function Sidebar(props: SidebarProps) {
-    const { selectedModel, setSelectedModel, noneSelected } = props;
-    const [repetitionPenalty, setRepetitionPenalty] = useState(1.0);
-    const [maxLength, setMaxLength] = useState(512);
+    const {
+        selectedModel,
+        setSelectedModel,
+        noneSelected,
+        generationConfig,
+        setGenerationConfig,
+    } = props;
+
     return (
         <div className="flex flex-col p-8 md:w-1/4 mx-auto bg-zinc-900">
-            <h1 className={`text-white text-lg font-semibold mx-auto tracking- ${manrope.className}`}>
+            <h1
+                className={`text-white text-lg font-semibold mx-auto tracking- ${manrope.className}`}
+            >
                 playground
             </h1>
             <div className="flex flex-col w-full text-sm gap-8 pt-12">
@@ -52,16 +60,26 @@ export default function Sidebar(props: SidebarProps) {
 
                 <RangeSlider
                     name="Repetition Penalty"
-                    value={repetitionPenalty}
-                    setValue={setRepetitionPenalty}
+                    value={generationConfig.repetition_penalty}
+                    setValue={(v: number) => {
+                        setGenerationConfig({
+                            ...generationConfig,
+                            repetition_penalty: v,
+                        });
+                    }}
                     min={0.0}
                     max={2.0}
                     step={0.01}
                 />
                 <RangeSlider
                     name="Max Length"
-                    value={maxLength}
-                    setValue={setMaxLength}
+                    value={generationConfig.max_length}
+                    setValue={(v: number) => {
+                        setGenerationConfig({
+                            ...generationConfig,
+                            max_length: v,
+                        });
+                    }}
                     min={1}
                     max={1024}
                     step={1}

@@ -7,6 +7,7 @@ import {
     SessionManager,
     AvailableModels,
     InferenceSession,
+    GenerationConfig,
 } from "@rumbl/laserbeak";
 import Layout from "../components/layout";
 import Sidebar from "../components/sidebar";
@@ -25,6 +26,13 @@ const Home: NextPage = () => {
     );
     const [noneSelected, setNoneSelected] = useState(false);
     const [generating, setGenerating] = useState(false);
+    const [generationConfig, setGenerationConfig] = useState<GenerationConfig>({
+        max_length: 512,
+        temperature: 1.0,
+        top_k: 0.0,
+        top_p: 0.0,
+        repetition_penalty: 1.0,
+    });
 
     useEffect(() => {
         if (loaded) {
@@ -46,13 +54,14 @@ const Home: NextPage = () => {
         if (selectedModel !== null && !loading) {
             console.log("Selected model:", selectedModel);
             const loadModel = async () => {
-                session.current = null;
+                if (session.current) {
+                    session.current.destroy();
+                }
                 setLoading(true);
-                let manager = new SessionManager();
-                let modelSession = await manager.loadModel(selectedModel, () =>
+                const manager = new SessionManager();
+                session.current = await manager.loadModel(selectedModel, () =>
                     setLoaded(true)
                 );
-                session.current = modelSession;
                 setLoading(false);
             };
 
@@ -62,20 +71,28 @@ const Home: NextPage = () => {
 
     //Hack to format the output
     function splitNumbered(text: string) {
-        let splits = text.split(/\s(?=\d+\.)/);
+        const splits = text.split(/\s(?=\d+\.)/);
         return splits.map((split) => split + "\n").join("");
     }
 
-    async function runSample(session: InferenceSession | null, prompt: string) {
+    async function runSample(
+        session: InferenceSession | null,
+        prompt: string,
+        generation_config: GenerationConfig
+    ) {
         try {
-            if (!session || !prompt || prompt.length < 2) {
+            if (!session || !prompt || prompt.length < 2 || generating) {
                 return;
             }
             setGenerating(true);
             const start = performance.now();
-            await session.run(prompt, (output: string) => {
-                setOutput(splitNumbered(output));
-            });
+            await session.run(
+                prompt,
+                (output: string) => {
+                    setOutput(splitNumbered(output));
+                },
+                generation_config
+            );
             const duration = performance.now() - start;
             setGenerating(false);
             console.log("Inference time:", duration.toFixed(2), "ms");
@@ -93,6 +110,8 @@ const Home: NextPage = () => {
                             setSelectedModel={setSelectedModel}
                             selectedModel={selectedModel}
                             noneSelected={noneSelected}
+                            generationConfig={generationConfig}
+                            setGenerationConfig={setGenerationConfig}
                         />
                         <div className="flex flex-col p-12 w-full mx-auto">
                             <textarea
@@ -113,7 +132,11 @@ const Home: NextPage = () => {
                                             }, 1000);
                                             return;
                                         }
-                                        runSample(session.current, prompt);
+                                        runSample(
+                                            session.current,
+                                            prompt,
+                                            generationConfig
+                                        );
                                     }}
                                 >
                                     {generating ? (

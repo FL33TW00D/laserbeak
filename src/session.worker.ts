@@ -3,6 +3,14 @@ import * as rumble from "@rumbl/rumble-wasm";
 import { AvailableModels, Model } from "./models";
 import ModelDB from "./db/modelDB";
 
+export interface GenerationConfig {
+    max_length: number;
+    temperature: number;
+    top_k: number;
+    top_p: number;
+    repetition_penalty: number;
+}
+
 export class Session {
     rumbleSession: rumble.Session | undefined;
 
@@ -16,10 +24,7 @@ export class Session {
         if (dbModels.length === 2) {
             const models = await Promise.all(
                 dbModels.map(async (m) => {
-                    const model = await Model.fromDBModel(
-                        m.model,
-                        db,
-                    );
+                    const model = await Model.fromDBModel(m.model, db);
                     return model;
                 })
             );
@@ -62,7 +67,8 @@ export class Session {
 
     public async run(
         input: string,
-        callback: (decoded: string) => void
+        callback: (decoded: string) => void,
+        generation_config?: GenerationConfig
     ): Promise<void> {
         if (!this.rumbleSession) {
             throw new Error(
@@ -70,10 +76,14 @@ export class Session {
             );
         }
 
-        return await this.rumbleSession.stream(input, callback);
+        return await this.rumbleSession.stream(
+            input,
+            callback,
+            generation_config
+        );
     }
 }
 
-if(typeof self !== 'undefined') {
+if (typeof self !== "undefined") {
     Comlink.expose(Session);
 }
