@@ -14,15 +14,30 @@ export async function runSample(
         let start_location = selection.focus;
         const start = performance.now();
         let prevOutput = "";
-        await session.run(inputText, (output: string) => {
-            Transforms.insertText(editor, output.substring(prevOutput.length), {
-                at: {
-                    path: start_location.path,
-                    offset: start_location.offset + prevOutput.length,
-                },
-            });
-            prevOutput = output;
-        });
+        let generation_config = {
+            max_length: 512,
+            temperature: 1.0,
+            top_k: 0.0,
+            top_p: 0.0,
+            repetition_penalty: 1.0,
+        };
+        await session.run(
+            inputText,
+            (output: string) => {
+                Transforms.insertText(
+                    editor,
+                    output.substring(prevOutput.length),
+                    {
+                        at: {
+                            path: start_location.path,
+                            offset: start_location.offset + prevOutput.length,
+                        },
+                    }
+                );
+                prevOutput = output;
+            },
+            generation_config
+        );
         const duration = performance.now() - start;
         console.log("Inference time:", duration.toFixed(2), "ms");
     } catch (e: any) {
