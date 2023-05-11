@@ -41,9 +41,7 @@ const ChromeDownloadModal = (props: ModalProps) => {
                         <h2 className="text-2xl font-bold pb-4">
                             Welcome to Summize!
                         </h2>
-                        <p>
-                            Summize is a local AI powered document editor.
-                        </p>
+                        <p>Summize is a local AI powered document editor.</p>
                         <Image
                             src="/toolbar.apng"
                             alt="Chrome is required."
@@ -57,7 +55,7 @@ const ChromeDownloadModal = (props: ModalProps) => {
                             translation features!
                         </p>
                         <p>
-                            When you press continue, this site performs a 900MB
+                            When you press continue, this site performs a 300MB
                             download. Please be patient.
                         </p>
                         <div className="flex flex-row gap-x-2">

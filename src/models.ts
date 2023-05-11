@@ -3,9 +3,10 @@ import ModelDB from "./db/modelDB";
 import { DBModel } from "./db/types";
 
 export enum AvailableModels {
-    FLAN_T5_BASE = "flan_t5_base",
-    LAMINI_FLAN_T5_BASE = "lamini_flan_base",
-    ALPACA_FLAN_T5_BASE = "alpaca_flan_base",
+    FLAN_T5_SMALL = "flan_t5_small_int8",
+    FLAN_T5_BASE = "flan_t5_base_int8",
+    LAMINI_FLAN_T5_BASE = "lamini_flan_base_int8",
+    ALPACA_FLAN_T5_BASE = "alpaca_flan_base_int8",
 }
 
 export class Model {
