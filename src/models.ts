@@ -37,19 +37,19 @@ export class Model {
     }
 
     static async fromDBModel(dbModel: DBModel, db: ModelDB): Promise<Result<Model, Error>> {
-        let tensorsResult = await db._getTensors(dbModel.tensorIDs);
+        let tensorsResult = await db.getTensors(dbModel.tensorIDs);
         if(tensorsResult.isErr) {
             return Result.err(tensorsResult.error);
         }
         let tensors = tensorsResult.value;
 
-        let configResult = await db._getConfig(dbModel.parentID);
+        let configResult = await db.getConfig(dbModel.parentID);
         if(configResult.isErr) {
             return Result.err(configResult.error);
         }
         let config = configResult.value;
 
-        let tokenizerResult = await db._getTokenizer(dbModel.parentID);
+        let tokenizerResult = await db.getTokenizer(dbModel.parentID);
         if(tokenizerResult.isErr) {
             return Result.err(tokenizerResult.error);
         }

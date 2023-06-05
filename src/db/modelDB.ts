@@ -10,9 +10,9 @@ import {
 import pLimit from "p-limit";
 import { AvailableModels } from "../models";
 import { Result } from "true-myth";
+import pRetry from "p-retry";
 
-//Fetch concurrency limit
-const fetchLimit = pLimit(4);
+const concurrentFetch = pLimit(4);
 
 interface ModelDBSchema extends DBSchema {
     models: {
@@ -85,13 +85,19 @@ export default class ModelDB {
         return new ModelDB(db);
     }
 
-    async _fetchBytes(url: string): Promise<Uint8Array> {
-        let response = await fetch(url);
-        let bytes = await response.arrayBuffer();
+    private async fetchBytes(url: string): Promise<Uint8Array> {
+        const run = async () => {
+            const response = await fetch(url);
+            if (response.status === 404) {
+                throw new Error(response.statusText);
+            }
+            return response.arrayBuffer();
+        };
+        let bytes = await pRetry(run, { retries: 3 });
         return new Uint8Array(bytes);
     }
 
-    async _getTensors(
+    async getTensors(
         tensorIDs: string[]
     ): Promise<Result<Map<string, Uint8Array>, Error>> {
         console.log("Attempting to get tensors");
@@ -138,7 +144,7 @@ export default class ModelDB {
         return Result.ok(models);
     }
 
-    async _getConfig(parentID: string): Promise<Result<DBConfig, Error>> {
+    async getConfig(parentID: string): Promise<Result<DBConfig, Error>> {
         console.log("Attempting to get config");
         if (!this.db) {
             return Result.err(new Error("ModelDB not initialized"));
@@ -158,7 +164,7 @@ export default class ModelDB {
         return Result.ok(config[0]);
     }
 
-    async _getTokenizer(parentID: string): Promise<Result<DBTokenizer, Error>> {
+    async getTokenizer(parentID: string): Promise<Result<DBTokenizer, Error>> {
         console.log("Attempting to get tokenizer");
         if (!this.db) {
             return Result.err(new Error("ModelDB not initialized"));
@@ -257,13 +263,13 @@ export default class ModelDB {
         ).then((resp) => resp.json());
         for (let [index, model] of model_definition.models.entries()) {
             let tensorPromises = model.tensors.map((tensorKey: string) => {
-                return fetchLimit(async () => {
+                return concurrentFetch(async () => {
                     let existingID = await this.tensorExists(tensorKey);
                     if (existingID.isOk) {
                         return existingID.value;
                     }
 
-                    let tensorBytes = await this._fetchBytes(
+                    let tensorBytes = await this.fetchBytes(
                         `${this.remoteUrl}/${modelName}/${tensorKey}`
                     );
 
@@ -273,7 +279,7 @@ export default class ModelDB {
 
             let tensorIDs = await Promise.all(tensorPromises);
 
-            let definitionBytes = await this._fetchBytes(
+            let definitionBytes = await this.fetchBytes(
                 `${this.remoteUrl}/${modelName}/${model.definition}`
             );
 
@@ -286,7 +292,7 @@ export default class ModelDB {
             );
         }
 
-        let config = await this._fetchBytes(
+        let config = await this.fetchBytes(
             `${this.remoteUrl}/${modelName}/config.json`
         );
 
@@ -299,7 +305,7 @@ export default class ModelDB {
             parentID
         );
 
-        let tokenizer = await this._fetchBytes(
+        let tokenizer = await this.fetchBytes(
             `${this.remoteUrl}/${modelName}/tokenizer.json`
         );
 

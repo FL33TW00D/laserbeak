@@ -2,6 +2,7 @@ import { InferenceSession } from "./inferenceSession";
 import * as Comlink from "comlink";
 import { Session } from "./session.worker";
 import { AvailableModels } from "./models";
+import { Result } from "true-myth";
 
 export class SessionManager {
     /**
@@ -14,7 +15,7 @@ export class SessionManager {
     public async loadModel(
         model: AvailableModels,
         onLoaded: (result: any) => void
-    ): Promise<InferenceSession | Error> {
+    ): Promise<Result<InferenceSession, Error>> {
         let session = await this.createSession(false, model);
         onLoaded(session);
         return session;
@@ -31,7 +32,7 @@ export class SessionManager {
     private async createSession(
         spawnWorker: boolean,
         model: AvailableModels
-    ): Promise<InferenceSession | Error> {
+    ): Promise<Result<InferenceSession, Error>> {
         if (spawnWorker && typeof document !== "undefined") {
             const SessionWorker = Comlink.wrap<typeof Session>(
                 new Worker(new URL("./session.worker.js", import.meta.url), {
@@ -40,11 +41,11 @@ export class SessionManager {
             );
             const session = await new SessionWorker();
             await session.initSession(model);
-            return new InferenceSession(session);
+            return Result.ok(new InferenceSession(session));
         } else {
             const session = new Session();
             await session.initSession(model);
-            return new InferenceSession(session);
+            return Result.ok(new InferenceSession(session));
         }
     }
 }

@@ -90,12 +90,12 @@ export class Session {
 
     public async initSession(
         model: AvailableModels
-    ): Promise<Result<void, Error>> {
+    ): Promise<Result<void, Error[]>> {
         if (this.rumbleSession) {
             return Result.err(
-                new Error(
+                [new Error(
                     "Session already initialized. Call `destroy()` first."
-                )
+                )]
             );
         }
         let modelResult = await this.loadModel(model);
@@ -106,7 +106,7 @@ export class Session {
 
         switch (models.length) {
             case 1:
-                await this.initStandalone(modelResult[0]);
+                await this.initStandalone(models[0]);
                 break;
             case 2:
                 await this.initEncoderDecoder(models);
