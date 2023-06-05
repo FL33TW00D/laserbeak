@@ -47,15 +47,15 @@ export class Session {
         await rumble.default();
 
         const session_builder = new rumble.SessionBuilder();
-        const rumbleModel = model.intoDefinition();
-        const config = model.config;
-        const tokenizer = model.tokenizer;
+        let session = session_builder.addModel(model.intoDefinition());
+        if (model.config) {
+            session = session.setConfig(model.config);
+        }
+        if (model.tokenizer) {
+            session = session.setTokenizer(model.tokenizer);
+        }
 
-        this.rumbleSession = await session_builder
-            .addModel(rumbleModel)
-            .setConfig(config!)
-            .setTokenizer(tokenizer!)
-            .build();
+        this.rumbleSession = await session.build();
     }
 
     private async initEncoderDecoder(
@@ -92,11 +92,11 @@ export class Session {
         model: AvailableModels
     ): Promise<Result<void, Error[]>> {
         if (this.rumbleSession) {
-            return Result.err(
-                [new Error(
+            return Result.err([
+                new Error(
                     "Session already initialized. Call `destroy()` first."
-                )]
-            );
+                ),
+            ]);
         }
         let modelResult = await this.loadModel(model);
         if (modelResult.isErr) {
@@ -118,7 +118,7 @@ export class Session {
     }
 
     public async run(
-        input: string,
+        input: any,
         callback: (result: string) => void,
         generation_config?: GenerationConfig
     ): Promise<Result<void, Error>> {

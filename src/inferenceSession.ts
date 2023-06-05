@@ -17,7 +17,7 @@ export class InferenceSession {
     }
 
     public async run(
-        input: string,
+        input: any,
         callback: (decoded: any) => void,
         generation_config?: GenerationConfig
     ): Promise<Result<void, Error>> {

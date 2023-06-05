@@ -85,16 +85,19 @@ export default class ModelDB {
         return new ModelDB(db);
     }
 
-    private async fetchBytes(url: string): Promise<Uint8Array> {
+    private async fetchBytes(url: string): Promise<Result<Uint8Array, Error>> {
         const run = async () => {
             const response = await fetch(url);
             if (response.status === 404) {
-                throw new Error(response.statusText);
+                throw new Error("404");
             }
             return response.arrayBuffer();
         };
         let bytes = await pRetry(run, { retries: 3 });
-        return new Uint8Array(bytes);
+        if (bytes instanceof Error) {
+            return Result.err(bytes);
+        }
+        return Result.ok(new Uint8Array(bytes));
     }
 
     async getTensors(
@@ -261,6 +264,7 @@ export default class ModelDB {
         let model_definition = await fetch(
             `${this.remoteUrl}/${modelName}/model_definition.json`
         ).then((resp) => resp.json());
+
         for (let [index, model] of model_definition.models.entries()) {
             let tensorPromises = model.tensors.map((tensorKey: string) => {
                 return concurrentFetch(async () => {
@@ -269,9 +273,15 @@ export default class ModelDB {
                         return existingID.value;
                     }
 
-                    let tensorBytes = await this.fetchBytes(
+                    let tensorResult = await this.fetchBytes(
                         `${this.remoteUrl}/${modelName}/${tensorKey}`
                     );
+
+                    if (tensorResult.isErr) {
+                        return Promise.reject(tensorResult.error);
+                    }
+
+                    let tensorBytes = tensorResult.value;
 
                     return await this.insertTensor(tensorKey, tensorBytes);
                 });
@@ -279,9 +289,13 @@ export default class ModelDB {
 
             let tensorIDs = await Promise.all(tensorPromises);
 
-            let definitionBytes = await this.fetchBytes(
+            let definitionResult = await this.fetchBytes(
                 `${this.remoteUrl}/${modelName}/${model.definition}`
             );
+            if (definitionResult.isErr) {
+                return Result.err(definitionResult.error);
+            }
+            let definitionBytes = definitionResult.value;
 
             await this.insertModel(
                 model.definition,
@@ -296,27 +310,35 @@ export default class ModelDB {
             `${this.remoteUrl}/${modelName}/config.json`
         );
 
-        this.db!.put(
-            "config",
-            {
-                bytes: config,
-                parentID: parentID,
-            },
-            parentID
-        );
+        if (config.isErr) {
+            return Result.err(config.error);
+        } else {
+            this.db!.put(
+                "config",
+                {
+                    bytes: config.value,
+                    parentID: parentID,
+                },
+                parentID
+            );
+        }
 
         let tokenizer = await this.fetchBytes(
             `${this.remoteUrl}/${modelName}/tokenizer.json`
         );
 
-        this.db!.put(
-            "tokenizer",
-            {
-                bytes: tokenizer,
-                parentID: parentID,
-            },
-            parentID
-        );
+        if (tokenizer.isErr) {
+            return Result.err(tokenizer.error);
+        } else {
+            this.db!.put(
+                "tokenizer",
+                {
+                    bytes: tokenizer.value,
+                    parentID: parentID,
+                },
+                parentID
+            );
+        }
         return Result.ok(undefined);
     }
 }
