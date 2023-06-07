@@ -59,9 +59,14 @@ const Home: NextPage = () => {
                 }
                 setLoading(true);
                 const manager = new SessionManager();
-                session.current = await manager.loadModel(selectedModel, () =>
+                const loadResult = await manager.loadModel(selectedModel, () =>
                     setLoaded(true)
                 );
+                if (loadResult.isErr) {
+                    toast.error(loadResult.error.message);
+                } else {
+                    session.current = loadResult.value;
+                }
                 setLoading(false);
             };
 
@@ -85,9 +90,11 @@ const Home: NextPage = () => {
                 return;
             }
             setGenerating(true);
+            const inputs_map = new Map<string, any>();
+            inputs_map.set("input_text", prompt);
             const start = performance.now();
             await session.run(
-                prompt,
+                inputs_map,
                 (output: string) => {
                     console.log("Output:", output);
                     setOutput(splitNumbered(output));

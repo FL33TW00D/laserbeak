@@ -118,7 +118,7 @@ export class Session {
     }
 
     public async run(
-        input: any,
+        input: Map<string, any>,
         callback: (result: string) => void,
         generation_config?: GenerationConfig
     ): Promise<Result<void, Error>> {

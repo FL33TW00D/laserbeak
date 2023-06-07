@@ -323,21 +323,25 @@ export default class ModelDB {
             );
         }
 
-        let tokenizer = await this.fetchBytes(
-            `${this.remoteUrl}/${modelName}/tokenizer.json`
-        );
+        let parsedConfig = JSON.parse(new TextDecoder().decode(config.value));
 
-        if (tokenizer.isErr) {
-            return Result.err(tokenizer.error);
-        } else {
-            this.db!.put(
-                "tokenizer",
-                {
-                    bytes: tokenizer.value,
-                    parentID: parentID,
-                },
-                parentID
+        if (parsedConfig.requires_tokenizer) {
+            let tokenizer = await this.fetchBytes(
+                `${this.remoteUrl}/${modelName}/tokenizer.json`
             );
+
+            if (tokenizer.isErr) {
+                return Result.err(tokenizer.error);
+            } else {
+                this.db!.put(
+                    "tokenizer",
+                    {
+                        bytes: tokenizer.value,
+                        parentID: parentID,
+                    },
+                    parentID
+                );
+            }
         }
         return Result.ok(undefined);
     }

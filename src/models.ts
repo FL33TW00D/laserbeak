@@ -5,6 +5,8 @@ import { DBModel } from "./db/types";
 
 export enum AvailableModels {
     E5_SMALL = "e5_small",
+    E5_SMALL_INT8 = "e5_small_int8",
+    E5_AUX = "e5_aux",
     FLAN_T5_SMALL = "flan_t5_small_int8",
     FLAN_T5_BASE = "flan_t5_base_int8",
     LAMINI_FLAN_T5_BASE = "lamini_flan_base_int8",
