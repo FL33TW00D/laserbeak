@@ -1,4 +1,5 @@
 import * as rumble from "@rumbl/rumble-wasm";
+import { Result } from "true-myth";
 import ModelDB from "./db/modelDB";
 import { DBModel } from "./db/types";
 
@@ -35,18 +36,32 @@ export class Model {
         return new rumble.ModelDefinition(this.definition, this.tensors);
     }
 
-    static async fromDBModel(dbModel: DBModel, db: ModelDB): Promise<Model> {
-        let tensors = await db._getTensors(dbModel.tensorIDs);
-        let config = await db._getConfig(dbModel.parentID);
-        let tokenizer = await db._getTokenizer(dbModel.parentID);
+    static async fromDBModel(dbModel: DBModel, db: ModelDB): Promise<Result<Model, Error>> {
+        let tensorsResult = await db._getTensors(dbModel.tensorIDs);
+        if(tensorsResult.isErr) {
+            return Result.err(tensorsResult.error);
+        }
+        let tensors = tensorsResult.value;
 
-        return new Model(
+        let configResult = await db._getConfig(dbModel.parentID);
+        if(configResult.isErr) {
+            return Result.err(configResult.error);
+        }
+        let config = configResult.value;
+
+        let tokenizerResult = await db._getTokenizer(dbModel.parentID);
+        if(tokenizerResult.isErr) {
+            return Result.err(tokenizerResult.error);
+        }
+        let tokenizer = tokenizerResult.value;
+
+        return Result.ok(new Model(
             dbModel.name,
             dbModel.bytes,
             tensors,
             config.bytes,
             tokenizer.bytes
-        );
+        ));
     }
 }
 

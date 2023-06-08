@@ -13,10 +13,10 @@ export class SessionManager {
      */
     public async loadModel(
         model: AvailableModels,
-        onLoaded: () => void
-    ): Promise<InferenceSession> {
-        let session = await this.createSession(true, model);
-        onLoaded();
+        onLoaded: (result: any) => void
+    ): Promise<InferenceSession | Error> {
+        let session = await this.createSession(false, model);
+        onLoaded(session);
         return session;
     }
 
@@ -31,7 +31,7 @@ export class SessionManager {
     private async createSession(
         spawnWorker: boolean,
         model: AvailableModels
-    ): Promise<InferenceSession> {
+    ): Promise<InferenceSession | Error> {
         if (spawnWorker && typeof document !== "undefined") {
             const SessionWorker = Comlink.wrap<typeof Session>(
                 new Worker(new URL("./session.worker.js", import.meta.url), {
