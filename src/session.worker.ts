@@ -44,7 +44,8 @@ export class Session {
     }
 
     private async initStandalone(model: Model): Promise<Result<void, Error>> {
-        await rumble.default();
+        let binga = await rumble.default();
+        console.warn("Binga: ", JSON.stringify(binga));
 
         const session_builder = new rumble.SessionBuilder();
         let session = session_builder.addModel(model.intoDefinition());
@@ -100,6 +101,7 @@ export class Session {
     public async initSession(
         model: AvailableModels
     ): Promise<Result<void, Error>> {
+        console.error("Initializing session with model: ", model);
         if (this.rumbleSession) {
             return Result.err(
                 new Error(
@@ -109,7 +111,7 @@ export class Session {
         }
         let modelResult = await this.loadModel(model);
         if (modelResult.isErr) {
-            console.log("Returning error");
+            console.error("Returning error: ", modelResult.error);
             return Result.err(new Error("Failed to load model"));
         }
         let models = modelResult.value;

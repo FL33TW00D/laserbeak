@@ -16,6 +16,7 @@ export class SessionManager {
         model: AvailableModels,
         onLoaded: (result: any) => void
     ): Promise<Result<InferenceSession, Error>> {
+        console.error("Starting model load...");
         let creationResult = await this.createSession(true, model);
         if(creationResult.isErr){
             return Result.err(creationResult.error);
@@ -37,6 +38,7 @@ export class SessionManager {
         model: AvailableModels
     ): Promise<Result<InferenceSession, Error>> {
         if (spawnWorker && typeof document !== "undefined") {
+            console.error("Spawning worker...");
             const SessionWorker = Comlink.wrap<typeof Session>(
                 new Worker(new URL("./session.worker.js", import.meta.url), {
                     type: "module",
@@ -46,7 +48,8 @@ export class SessionManager {
             let initResult = await session.initSession(model) as unknown;
             //@ts-ignore fucking comlink
             if (initResult.repr[0] === "Err") {
-                return Result.err(new Error("Session initialization failed."));
+                //@ts-ignore
+                return Result.err(new Error("Session initialization failed: " + initResult.repr[1]));
             }
             return Result.ok(new InferenceSession(session));
         } else {
