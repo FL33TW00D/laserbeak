@@ -16,9 +16,12 @@ export class SessionManager {
         model: AvailableModels,
         onLoaded: (result: any) => void
     ): Promise<Result<InferenceSession, Error>> {
-        let session = await this.createSession(true, model);
-        onLoaded(session);
-        return session;
+        let creationResult = await this.createSession(true, model);
+        if(creationResult.isErr){
+            return Result.err(creationResult.error);
+        }
+        onLoaded(creationResult.value);
+        return Result.ok(creationResult.value);
     }
 
     /**
@@ -40,11 +43,19 @@ export class SessionManager {
                 })
             );
             const session = await new SessionWorker();
-            await session.initSession(model);
+            let initResult = await session.initSession(model) as unknown;
+            //@ts-ignore fucking comlink
+            if (initResult.repr[0] === "Err") {
+                return Result.err(new Error("Session initialization failed."));
+            }
             return Result.ok(new InferenceSession(session));
         } else {
             const session = new Session();
-            await session.initSession(model);
+            let initResult = await session.initSession(model);
+            if (initResult.isErr) {
+                console.error("Error initializing session: ", initResult);
+                return Result.err(initResult.error);
+            }
             return Result.ok(new InferenceSession(session));
         }
     }

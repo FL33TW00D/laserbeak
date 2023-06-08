@@ -12,12 +12,14 @@ export class InferenceSession {
         this.session = session;
     }
 
-    async initSession(model: AvailableModels): Promise<void> {
-        await this.session!.initSession(model);
+    async initSession(model: AvailableModels): Promise<Result<void, Error>> {
+        return await this.session!.initSession(model);
     }
 
     //bit of a hack for now, should be recursive
-    private convertInputs(input: Map<string, any>): Result<Map<string, Uint8Array>, Error> {
+    private convertInputs(
+        input: Map<string, any>
+    ): Result<Map<string, Uint8Array>, Error> {
         const converted = new Map<string, Uint8Array>();
         for (const [key, value] of input) {
             if (typeof value === "string") {
@@ -32,7 +34,7 @@ export class InferenceSession {
                         .flat() as unknown as Float32Array;
                     converted.set(key, new Uint8Array(flattened.buffer));
                 }
-            }else {
+            } else {
                 return Result.err(new Error("Unsupported input type"));
             }
         }

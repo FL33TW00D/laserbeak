@@ -93,7 +93,7 @@ const Home: NextPage = () => {
             const inputs_map = new Map<string, any>();
             inputs_map.set("input_text", prompt);
             const start = performance.now();
-            await session.run(
+            let runResult = await session.run(
                 inputs_map,
                 (output: string) => {
                     console.log("Output:", output);
@@ -103,6 +103,10 @@ const Home: NextPage = () => {
             );
             const duration = performance.now() - start;
             setGenerating(false);
+            if(runResult.isErr) {
+                toast.error(runResult.error.message);
+                return;
+            }
             console.log("Inference time:", duration.toFixed(2), "ms");
         } catch (e: any) {
             console.log(e.toString());

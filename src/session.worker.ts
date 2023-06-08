@@ -43,7 +43,7 @@ export class Session {
         return Result.ok(models);
     }
 
-    private async initStandalone(model: Model): Promise<void> {
+    private async initStandalone(model: Model): Promise<Result<void, Error>> {
         await rumble.default();
 
         const session_builder = new rumble.SessionBuilder();
@@ -56,6 +56,7 @@ export class Session {
         }
 
         this.rumbleSession = await session.build();
+        return Result.ok(undefined);
     }
 
     private async initEncoderDecoder(
@@ -78,6 +79,14 @@ export class Session {
         const config = models[0].config;
         const tokenizer = models[0].tokenizer;
 
+        if (!config || !tokenizer) {
+            return Result.err(
+                new Error(
+                    "Failed to construct encoder-decoder session. Models must have config and tokenizer"
+                )
+            );
+        }
+
         this.rumbleSession = await session_builder
             .addModel(encoder)
             .addModel(decoder)
@@ -90,31 +99,29 @@ export class Session {
 
     public async initSession(
         model: AvailableModels
-    ): Promise<Result<void, Error[]>> {
+    ): Promise<Result<void, Error>> {
         if (this.rumbleSession) {
-            return Result.err([
+            return Result.err(
                 new Error(
                     "Session already initialized. Call `destroy()` first."
-                ),
-            ]);
+                )
+            );
         }
         let modelResult = await this.loadModel(model);
         if (modelResult.isErr) {
-            return Result.err(modelResult.error);
+            console.log("Returning error");
+            return Result.err(new Error("Failed to load model"));
         }
         let models = modelResult.value;
 
         switch (models.length) {
             case 1:
-                await this.initStandalone(models[0]);
-                break;
+                return await this.initStandalone(models[0]);
             case 2:
-                await this.initEncoderDecoder(models);
-                break;
+                return await this.initEncoderDecoder(models);
             default:
                 throw new Error("Invalid number of models: " + models.length);
         }
-        return Result.ok(undefined);
     }
 
     public async run(
@@ -135,6 +142,7 @@ export class Session {
             callback,
             generation_config
         );
+        console.log("Running session with input: ", sessionInput);
 
         return Result.ok(await this.rumbleSession.run(sessionInput));
     }
