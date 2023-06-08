@@ -112,7 +112,7 @@ export class Session {
                 await this.initEncoderDecoder(models);
                 break;
             default:
-                throw new Error("Invalid number of models");
+                throw new Error("Invalid number of models: " + models.length);
         }
         return Result.ok(undefined);
     }

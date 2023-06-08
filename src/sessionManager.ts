@@ -16,7 +16,7 @@ export class SessionManager {
         model: AvailableModels,
         onLoaded: (result: any) => void
     ): Promise<Result<InferenceSession, Error>> {
-        let session = await this.createSession(false, model);
+        let session = await this.createSession(true, model);
         onLoaded(session);
         return session;
     }
