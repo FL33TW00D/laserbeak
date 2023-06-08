@@ -18,21 +18,19 @@ export class Session {
         let db = await ModelDB.create();
         const dbModels = await db.getModels(model);
         if (!dbModels) {
-            console.log(dbModels);
             throw new Error("Model not found");
         }
-        if (dbModels.length === 2) {
-            const models = await Promise.all(
-                dbModels.map(async (m) => {
-                    const model = await Model.fromDBModel(m.model, db);
-                    return model;
-                })
-            );
+        const models = await Promise.all(
+            dbModels.map(async (m) => {
+                const model = await Model.fromDBModel(m.model, db);
+                return model;
+            })
+        );
 
-            return models;
-        }
-        throw new Error("Only encoder-decoder models are supported currently.");
+        return models;
     }
+
+    private async initStandalone(model: Model): Promise<void> {}
 
     private async initEncoderDecoder(models: Model[]): Promise<void> {
         await rumble.default();
@@ -62,12 +60,21 @@ export class Session {
             throw new Error("This session is already initialized");
         }
         let models = await this.loadModel(model);
-        await this.initEncoderDecoder(models);
+        switch (models.length) {
+            case 1:
+                await this.initStandalone(models[0]);
+                break;
+            case 2:
+                await this.initEncoderDecoder(models);
+                break;
+            default:
+                throw new Error("Invalid number of models");
+        }
     }
 
     public async run(
         input: string,
-        callback: (decoded: string) => void,
+        callback: (result: string) => void,
         generation_config?: GenerationConfig
     ): Promise<void> {
         if (!this.rumbleSession) {

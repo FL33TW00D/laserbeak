@@ -21,7 +21,11 @@ export class InferenceSession {
         generation_config?: GenerationConfig
     ): Promise<void> {
         if (this.session instanceof Session) {
-            return await this.session.run(input, callback, generation_config);
+            return await this.session.run(
+                input,
+                callback,
+                generation_config
+            );
         } else {
             return await this.session!.run(
                 input,
