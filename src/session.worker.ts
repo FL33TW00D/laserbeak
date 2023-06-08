@@ -50,8 +50,8 @@ export class Session {
         const tokenizer = models[0].tokenizer;
 
         this.rumbleSession = await session_builder
-            .setEncoder(encoder)
-            .setDecoder(decoder)
+            .addModel(encoder)
+            .addModel(decoder)
             .setConfig(config!)
             .setTokenizer(tokenizer!)
             .build();
@@ -76,11 +76,13 @@ export class Session {
             );
         }
 
-        return await this.rumbleSession.stream(
+        let sessionInput = new rumble.SessionInput(
             input,
             callback,
             generation_config
         );
+
+        return await this.rumbleSession.run(sessionInput);
     }
 }
 
