@@ -45,12 +45,14 @@ export class SessionManager {
                 })
             );
             const session = await new SessionWorker();
-            let initResult = await session.initSession(model) as unknown;
+            let initResult = await session.initSession(model);
+            console.warn("Init result: ", JSON.stringify(initResult));
             //@ts-ignore fucking comlink
             if (initResult.repr[0] === "Err") {
                 //@ts-ignore
                 return Result.err(new Error("Session initialization failed: " + initResult.repr[1]));
             }
+            console.warn("Session: ", JSON.stringify(session));
             return Result.ok(new InferenceSession(session));
         } else {
             const session = new Session();

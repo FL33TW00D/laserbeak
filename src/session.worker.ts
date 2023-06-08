@@ -56,8 +56,15 @@ export class Session {
             session = session.setTokenizer(model.tokenizer);
         }
 
-        this.rumbleSession = await session.build();
-        return Result.ok(undefined);
+        try {
+            let sessionResult = await session.build();
+            console.warn("Session result: ", JSON.stringify(sessionResult));
+            this.rumbleSession = sessionResult;
+            return Result.ok(undefined);
+        } catch (e) {
+            console.error("Failed to build session: ", e);
+            return Result.err(new Error("Failed to build session"));
+        }
     }
 
     private async initEncoderDecoder(
