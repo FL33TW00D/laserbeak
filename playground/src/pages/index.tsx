@@ -89,6 +89,7 @@ const Home: NextPage = () => {
             await session.run(
                 prompt,
                 (output: string) => {
+                    console.log("Output:", output);
                     setOutput(splitNumbered(output));
                 },
                 generation_config

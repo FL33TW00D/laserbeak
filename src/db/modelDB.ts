@@ -185,9 +185,6 @@ export default class ModelDB {
         }
 
         let storedModels = await this._getModels(parentID!);
-        if (storedModels.length !== 2) {
-            throw new Error("Expected 2 models, got " + storedModels.length);
-        }
 
         return storedModels;
     }

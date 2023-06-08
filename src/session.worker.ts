@@ -30,7 +30,21 @@ export class Session {
         return models;
     }
 
-    private async initStandalone(model: Model): Promise<void> {}
+    private async initStandalone(model: Model): Promise<void> {
+        await rumble.default();
+        
+        const session_builder = new rumble.SessionBuilder();
+        const rumbleModel = model.intoDefinition();
+        const config = model.config;
+        const tokenizer = model.tokenizer;
+
+        this.rumbleSession = await session_builder
+            .addModel(rumbleModel)
+            .setConfig(config!)
+            .setTokenizer(tokenizer!)
+            .build();
+    }
+
 
     private async initEncoderDecoder(models: Model[]): Promise<void> {
         await rumble.default();
