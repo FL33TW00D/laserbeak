@@ -18,7 +18,7 @@
         "lint": "eslint ./src"
     },
     "dependencies": {
-        "@rumbl/rumble-wasm": "0.7.3",
+        "@rumbl/rumble-wasm": "../rumble/target/pkg",
         "comlink": "4.3.1",
         "idb": "^7.1.1",
         "p-limit": "^4.0.0",
