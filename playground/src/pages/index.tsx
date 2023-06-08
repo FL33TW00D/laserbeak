@@ -93,7 +93,7 @@ const Home: NextPage = () => {
             const inputs_map = new Map<string, any>();
             inputs_map.set("input_text", prompt);
             const start = performance.now();
-            let runResult = await session.run(
+            const runResult = await session.run(
                 inputs_map,
                 (output: string) => {
                     console.log("Output:", output);
