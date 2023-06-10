@@ -90,7 +90,7 @@ const Home: NextPage = () => {
                 return;
             }
             setGenerating(true);
-            const inputs_map = new Map<string, any>();
+            let inputs_map = new Map<string, any>();
             inputs_map.set("input_text", prompt);
             const start = performance.now();
             const runResult = await session.run(

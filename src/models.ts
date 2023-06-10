@@ -1,7 +1,7 @@
 import * as rumble from "@rumbl/rumble-wasm";
 import { Result } from "true-myth";
 import ModelDB from "./db/modelDB";
-import { DBModel } from "./db/types";
+import { DBModel, DBTokenizer } from "./db/types";
 
 export enum AvailableModels {
     E5_SMALL = "e5_small",
@@ -38,32 +38,37 @@ export class Model {
         return new rumble.ModelDefinition(this.definition, this.tensors);
     }
 
-    static async fromDBModel(dbModel: DBModel, db: ModelDB): Promise<Result<Model, Error>> {
+    static async fromDBModel(
+        dbModel: DBModel,
+        db: ModelDB
+    ): Promise<Result<Model, Error>> {
         let tensorsResult = await db.getTensors(dbModel.tensorIDs);
-        if(tensorsResult.isErr) {
+        if (tensorsResult.isErr) {
             return Result.err(tensorsResult.error);
         }
         let tensors = tensorsResult.value;
 
         let configResult = await db.getConfig(dbModel.parentID);
-        if(configResult.isErr) {
+        if (configResult.isErr) {
             return Result.err(configResult.error);
         }
         let config = configResult.value;
 
         let tokenizerResult = await db.getTokenizer(dbModel.parentID);
-        if(tokenizerResult.isErr) {
-            return Result.err(tokenizerResult.error);
+        let tokenizerBytes: Uint8Array | undefined = undefined;
+        if (tokenizerResult.isOk) {
+            tokenizerBytes = tokenizerResult.value.bytes;
         }
-        let tokenizer = tokenizerResult.value;
 
-        return Result.ok(new Model(
-            dbModel.name,
-            dbModel.bytes,
-            tensors,
-            config.bytes,
-            tokenizer.bytes
-        ));
+        return Result.ok(
+            new Model(
+                dbModel.name,
+                dbModel.bytes,
+                tensors,
+                config.bytes,
+                tokenizerBytes
+            )
+        );
     }
 }
 

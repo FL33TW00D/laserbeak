@@ -44,9 +44,7 @@ export class Session {
     }
 
     private async initStandalone(model: Model): Promise<Result<void, Error>> {
-        let binga = await rumble.default();
-        console.warn("Binga: ", JSON.stringify(binga));
-
+        await rumble.default();
         const session_builder = new rumble.SessionBuilder();
         let session = session_builder.addModel(model.intoDefinition());
         if (model.config) {
@@ -146,7 +144,7 @@ export class Session {
             );
         }
 
-        let sessionInput = new rumble.SessionInput(
+        let sessionInput = new rumble.SessionEvent(
             input,
             callback,
             generation_config
