@@ -1,10 +1,16 @@
 {
     "name": "@rumbl/laserbeak",
-    "version": "0.7.4",
+    "version": "0.7.5",
     "author": "Christopher Fleetwood <chris@fleetwood.dev>",
     "description": "ML on the GPU comes to the browser",
     "repository": "FL33TW00D/laserbeak",
-    "keywords": ["rust", "WebGPU", "ML", "Machine Learning", "AI"],
+    "keywords": [
+        "rust",
+        "WebGPU",
+        "ML",
+        "Machine Learning",
+        "AI"
+    ],
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "devDependencies": {
@@ -22,7 +28,11 @@
         "comlink": "4.3.1",
         "idb": "^7.1.1",
         "p-limit": "^4.0.0",
+        "p-retry": "^5.1.2",
+        "true-myth": "^6.2.0",
         "uuid": "^9.0.0"
     },
-    "files": ["dist/**/*"]
+    "files": [
+        "dist/**/*"
+    ]
 }

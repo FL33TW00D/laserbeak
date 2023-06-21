@@ -12,8 +12,8 @@ export async function runSample(
             return;
         }
         let start_location = selection.focus;
-        const start = performance.now();
         let prevOutput = "";
+        let tokenCount = 0;
         let generation_config = {
             max_length: 512,
             temperature: 1.0,
@@ -21,9 +21,11 @@ export async function runSample(
             top_p: 0.0,
             repetition_penalty: 1.0,
         };
+        const start = performance.now();
         await session.run(
             inputText,
             (output: string) => {
+                tokenCount += 1;
                 Transforms.insertText(
                     editor,
                     output.substring(prevOutput.length),
@@ -40,6 +42,7 @@ export async function runSample(
         );
         const duration = performance.now() - start;
         console.log("Inference time:", duration.toFixed(2), "ms");
+        console.log("Tok/sec:", (tokenCount / (duration / 1000)).toFixed(2));
     } catch (e: any) {
         console.log(e.toString());
     }

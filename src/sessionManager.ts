@@ -2,6 +2,7 @@ import { InferenceSession } from "./inferenceSession";
 import * as Comlink from "comlink";
 import { Session } from "./session.worker";
 import { AvailableModels } from "./models";
+import { Result } from "true-myth";
 
 export class SessionManager {
     /**
@@ -13,11 +14,15 @@ export class SessionManager {
      */
     public async loadModel(
         model: AvailableModels,
-        onLoaded: () => void
-    ): Promise<InferenceSession> {
-        let session = await this.createSession(true, model);
-        onLoaded();
-        return session;
+        onLoaded: (result: any) => void
+    ): Promise<Result<InferenceSession, Error>> {
+        console.error("Starting model load...");
+        let creationResult = await this.createSession(true, model);
+        if(creationResult.isErr){
+            return Result.err(creationResult.error);
+        }
+        onLoaded(creationResult.value);
+        return Result.ok(creationResult.value);
     }
 
     /**
@@ -31,20 +36,30 @@ export class SessionManager {
     private async createSession(
         spawnWorker: boolean,
         model: AvailableModels
-    ): Promise<InferenceSession> {
+    ): Promise<Result<InferenceSession, Error>> {
         if (spawnWorker && typeof document !== "undefined") {
+            console.error("Spawning worker...");
             const SessionWorker = Comlink.wrap<typeof Session>(
                 new Worker(new URL("./session.worker.js", import.meta.url), {
                     type: "module",
                 })
             );
             const session = await new SessionWorker();
-            await session.initSession(model);
-            return new InferenceSession(session);
+            let initResult = await session.initSession(model);
+            //@ts-ignore fucking comlink
+            if (initResult.repr[0] === "Err") {
+                //@ts-ignore
+                return Result.err(new Error("Session initialization failed: " + initResult.repr[1]));
+            }
+            return Result.ok(new InferenceSession(session));
         } else {
             const session = new Session();
-            await session.initSession(model);
-            return new InferenceSession(session);
+            let initResult = await session.initSession(model);
+            if (initResult.isErr) {
+                console.error("Error initializing session: ", initResult);
+                return Result.err(initResult.error);
+            }
+            return Result.ok(new InferenceSession(session));
         }
     }
 }

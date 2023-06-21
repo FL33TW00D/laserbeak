@@ -59,9 +59,14 @@ const Home: NextPage = () => {
                 }
                 setLoading(true);
                 const manager = new SessionManager();
-                session.current = await manager.loadModel(selectedModel, () =>
+                const loadResult = await manager.loadModel(selectedModel, () =>
                     setLoaded(true)
                 );
+                if (loadResult.isErr) {
+                    toast.error(loadResult.error.message);
+                } else {
+                    session.current = loadResult.value;
+                }
                 setLoading(false);
             };
 
@@ -85,16 +90,23 @@ const Home: NextPage = () => {
                 return;
             }
             setGenerating(true);
+            let inputs_map = new Map<string, any>();
+            inputs_map.set("input_text", prompt);
             const start = performance.now();
-            await session.run(
-                prompt,
+            const runResult = await session.run(
+                inputs_map,
                 (output: string) => {
+                    console.log("Output:", output);
                     setOutput(splitNumbered(output));
                 },
                 generation_config
             );
             const duration = performance.now() - start;
             setGenerating(false);
+            if(runResult.isErr) {
+                toast.error(runResult.error.message);
+                return;
+            }
             console.log("Inference time:", duration.toFixed(2), "ms");
         } catch (e: any) {
             console.log(e.toString());

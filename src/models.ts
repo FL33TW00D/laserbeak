@@ -1,8 +1,12 @@
 import * as rumble from "@rumbl/rumble-wasm";
+import { Result } from "true-myth";
 import ModelDB from "./db/modelDB";
-import { DBModel } from "./db/types";
+import { DBModel, DBTokenizer } from "./db/types";
 
 export enum AvailableModels {
+    E5_SMALL = "e5_small",
+    E5_SMALL_INT8 = "e5_small_int8",
+    E5_AUX = "e5_aux",
     FLAN_T5_SMALL = "flan_t5_small_int8",
     FLAN_T5_BASE = "flan_t5_base_int8",
     LAMINI_FLAN_T5_BASE = "lamini_flan_base_int8",
@@ -34,17 +38,36 @@ export class Model {
         return new rumble.ModelDefinition(this.definition, this.tensors);
     }
 
-    static async fromDBModel(dbModel: DBModel, db: ModelDB): Promise<Model> {
-        let tensors = await db._getTensors(dbModel.tensorIDs);
-        let config = await db._getConfig(dbModel.parentID);
-        let tokenizer = await db._getTokenizer(dbModel.parentID);
+    static async fromDBModel(
+        dbModel: DBModel,
+        db: ModelDB
+    ): Promise<Result<Model, Error>> {
+        let tensorsResult = await db.getTensors(dbModel.tensorIDs);
+        if (tensorsResult.isErr) {
+            return Result.err(tensorsResult.error);
+        }
+        let tensors = tensorsResult.value;
 
-        return new Model(
-            dbModel.name,
-            dbModel.bytes,
-            tensors,
-            config.bytes,
-            tokenizer.bytes
+        let configResult = await db.getConfig(dbModel.parentID);
+        if (configResult.isErr) {
+            return Result.err(configResult.error);
+        }
+        let config = configResult.value;
+
+        let tokenizerResult = await db.getTokenizer(dbModel.parentID);
+        let tokenizerBytes: Uint8Array | undefined = undefined;
+        if (tokenizerResult.isOk) {
+            tokenizerBytes = tokenizerResult.value.bytes;
+        }
+
+        return Result.ok(
+            new Model(
+                dbModel.name,
+                dbModel.bytes,
+                tensors,
+                config.bytes,
+                tokenizerBytes
+            )
         );
     }
 }
